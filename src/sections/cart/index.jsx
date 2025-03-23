@@ -55,21 +55,53 @@ const CartContainer = styled.div`
 `;
 
 function Cart () {
-    const { products } = useProduct();
+    const { products, categoriesToSelect } = useProduct();
     const [order, setOrder] = useState();
     const [categories, setCategories] = useState([]);
-    const [selectedProduct, _setSelectedProduct] = useState();
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+    const [searchName, setSearchName] = useState('');
 
     const filteredProducts = useMemo(() => {
-        return products.filter(prd => !prd.isDeleted);
-    }, [products, order ,categories]);
+        const filterByCategory = (prds) => {
+            return prds.filter(prd => categories.every(cat => prd.categories.includes(cat)));
+        }
+
+        const filterByName = (prds) => {
+            const searchParam = searchName.toLowerCase();
+            return prds.filter(prd => prd.name.toLowerCase().includes(searchParam));
+        }
+
+        const orderBy = (prds) => {
+            return prds.sort((prd1, prd2) => {
+                if (order.label === 'Por maior preço') {
+                    return prd2.price - prd1.price;
+                }
+                
+                return prd1.price - prd2.price;
+            });
+        };
+
+        return [
+            categories.length > 0 ? filterByCategory : null,
+            searchName ? filterByName : null,
+            order ? orderBy : null
+        ].filter(Boolean).reduce((acc, execFun) => {
+            return execFun(acc);
+        }, products);
+    }, [products, order ,categories, searchName]);
 
     return (
     <PageContainer>
         <ProductsContainer>
             <SearchContainer>
-                <TextField style={{ width: 250 }} id="search-by-name" label="Nome do Produto" variant="outlined" />
+                <TextField 
+                    style={{ width: 250 }} 
+                    value={searchName} 
+                    onChange={(e) => setSearchName(e.target.value)}
+                    id="search-by-name" 
+                    label="Nome do Produto" 
+                    variant="outlined"
+                />
                 <Autocomplete
                     disablePortal
                     options={[
@@ -85,7 +117,7 @@ function Cart () {
                 />
                 <Autocomplete
                     disablePortal
-                    options={[{ label: 'test' }, {label: 'test2'}]}
+                    options={categoriesToSelect}
                     multiple
                     value={categories}
                     onChange={(_event, newValue) => {
@@ -114,7 +146,6 @@ function Cart () {
             isProductModalOpen && 
             (
                 <ProductModal 
-                    product={selectedProduct} 
                     handleClose={() => {
                         setIsProductModalOpen(false);
                     }} 

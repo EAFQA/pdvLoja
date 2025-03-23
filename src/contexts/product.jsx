@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { exists, BaseDirectory, readFile, readTextFile, writeTextFile, writeFile, mkdir } from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
 import { Buffer } from "buffer";
@@ -21,6 +21,21 @@ const config = {
 export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const activeProducts = useMemo(() => {
+      return products.filter(prd => !prd.isDeleted);
+  }, [products]);
+
+  const categoriesToSelect = useMemo(() => {
+      return activeProducts.reduce((acc, prd) => {
+          prd.categories.forEach(cat => {
+              if (!acc.includes(cat)) {
+                  acc.push(cat);
+              }
+          });
+          return acc;
+      }, []);
+  }, [products]);
 
   const loadData = useCallback(async () => {
     const dbName = await getDbName();
@@ -194,13 +209,14 @@ export const ProductProvider = ({ children }) => {
   return (
     <ProductContext.Provider 
       value={{
-        products, 
+        products : activeProducts, 
         addProduct, 
         removeProduct, 
         selectedProduct, 
         selectProduct, 
         updateStock,
-        updateProduct
+        updateProduct,
+        categoriesToSelect
       }}
     >
       {children}

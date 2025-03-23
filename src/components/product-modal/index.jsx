@@ -50,7 +50,7 @@ const ImageUploadContainer = styled.div`
 `;
 
 function ProductModal({ product, handleClose }) {
-    const { addProduct, updateProduct } = useProduct();
+    const { addProduct, updateProduct, categoriesToSelect } = useProduct();
     const { logAction } = useActions();
     const [formValue, setFormValue] = useState(product || {
         name: '',
@@ -177,13 +177,20 @@ function ProductModal({ product, handleClose }) {
 
             <Autocomplete
                 disablePortal
-                options={[{ label: 'test: 1'}]}
+                options={categoriesToSelect}
                 multiple
                 sx={{ 
                     width: '100%'
                 }}
                 style={{ marginBottom: 16 }}
                 freeSolo
+                value={formValue.categories}
+                onChange={(_event, value) => {
+                    setFormValue({
+                        ...formValue,
+                        categories: value
+                    });
+                }}
                 renderInput={(params) => <TextField {...params} fullWidth label="Categorias" />}
             />
             

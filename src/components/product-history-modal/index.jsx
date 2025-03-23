@@ -99,6 +99,11 @@ function ProductHistoryModal({ product, handleClose }) {
                         {log}
                     </ProductHistoryText>
                 ))}
+                {logs.length === 0 && (
+                    <ProductHistoryText style={{ backgroundColor: '#FFFFFF' }}>
+                        Nenhuma alteração de estoque registrada
+                    </ProductHistoryText>
+                )}
             </ProductHistoryList>
 
             <FlexContainer style={{ marginTop: 'auto', justifyContent: 'center' }}>
