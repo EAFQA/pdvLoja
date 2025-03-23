@@ -49,7 +49,7 @@ export const ProductItem = styled.div`
   box-shadow: 4px 4px 4px 6px rgba(0, 0, 0, 0.1);
   width: 140px;
   cursor: pointer;
-  height: 210px;
+  height: 260px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -61,27 +61,18 @@ export const ProductItem = styled.div`
 
 export const ProductImage = styled.div`
   margin-bottom: 10px;
+  margin-top: 5px;
   background-image: url(${(props) => props.src});
-  background-size: 100% 100%;
+  background-size: contain;
   background-repeat: no-repeat;
-  height: 160px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  height: 140px;
   width: 100%;
   display: flex;
   justify-content: end;
   align-items: start;
 `;
-
-const mockProds = [
-  {
-    id: '12312',
-    name: '123123',
-    price: 19.90,
-    stockQuantity: 3,
-    minStockQuantity: 1,
-    image: "https://cdnv2.moovin.com.br/sjo/imagens/produtos/det/-terco-de-madeira-sao-bento-759b5707fd223f32a843b70393f3564f.png",
-    categories: ['style']
-  }
-]
 
 function ProductStockList({ products, onEditProduct, onDeleteProduct, onShowProductHistory }) {
   const {

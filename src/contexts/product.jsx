@@ -37,21 +37,14 @@ export const ProductProvider = ({ children }) => {
           const items = await map(JSON.parse(contents),
             async item => {
               try {
+                if (!item.image) return item;
                 const imageFile = await readFile(item.image, config);
-
-                const imageName = item.image.split('/')[1];
-
-                const file = new File([
-                  new Blob(imageFile)
-                ], imageName, {
-                  type: imageName.split('.').at(-1)
-                });
-
-                console.log(file);
                 
                 return {
                   ...item,
-                  imageUrl: `${await path.join(await path.documentDir(), item.image)}`
+                  imageUrl: URL.createObjectURL(
+                    new Blob([imageFile.buffer], { type: 'image/png' })
+                  )                  
                 }
               } catch (err) {
                 console.error(err);
@@ -59,8 +52,6 @@ export const ProductProvider = ({ children }) => {
               return item;
             }
           );
-
-          await Promise.all(items);
 
           console.log(items);
           setProducts(items);
@@ -101,7 +92,6 @@ export const ProductProvider = ({ children }) => {
             const buffer = new Uint8Array(arrayBuffer);
   
             try {
-              console.log(1);
               resolve(buffer);
             } catch (err) {
               console.error(err);

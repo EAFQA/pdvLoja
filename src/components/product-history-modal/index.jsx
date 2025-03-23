@@ -69,15 +69,17 @@ function ProductHistoryModal({ product, handleClose }) {
 
             const dateString = `${new Date(log.date).toLocaleDateString()} ${dateStrWithoutSeconds}: `;
             
+            const isPlural = productLog.quantity > 1 || productLog.quantity < -1;
+
             if (log.type === 'sale')
             {
                 const total = productLog.quantity * product.price;
-                return `${dateString}Venda de ${productLog.quantity} unidades por R$${total.toFixed(2).replace('.', ',')}`;
+                return `${dateString}Venda de ${productLog.quantity} unidade${isPlural ? 's' : ''} por R$${total.toFixed(2).replace('.', ',')}`;
             }
 
             if (log.type === 'stock')
             {
-                return `${dateString}${productLog.quantity > 0 ? 'Adição' : 'Remoção'} de ${Math.abs(productLog.quantity)} unidades manualmente`;
+                return `${dateString}${productLog.quantity > 0 ? 'Adição' : 'Remoção'} de ${Math.abs(productLog.quantity)} unidade${isPlural ? 's' : ''} manualmente`;
             }
 
             return "";
