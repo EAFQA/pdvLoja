@@ -47,6 +47,7 @@ export const ProductImage = styled.div`
 function StockUpdateList() {
   const { completeUpdate, editingActionProducts, removeItemFromAction, clearEditingActionProducts } = useActions();
   const { updateStock } = useProduct();
+  const { updateCartByStockAction } = useCart();
 
   return (
     <ProductContainer>
@@ -92,6 +93,7 @@ function StockUpdateList() {
                       incrementQuantity: item.type === 'add' ? item.quantity : item.quantity * -1,
                     }));
                     updateStock(stockAction);
+                    updateCartByStockAction(stockAction);
                     toast.success('Estoque atualizado com sucesso!');
                     completeUpdate();
                   }}

@@ -7,6 +7,7 @@ import { MdDelete } from "react-icons/md";
 import { useProduct } from '../../contexts/product';
 import { toast } from 'react-toastify';
 import { useActions } from '../../contexts/actions';
+import { useCart } from '../../contexts/cart';
 
 const Container = styled.div`
     display: flex;
@@ -51,6 +52,7 @@ const ImageUploadContainer = styled.div`
 
 function ProductModal({ product, handleClose }) {
     const { addProduct, updateProduct, categoriesToSelect } = useProduct();
+    const { updateCartByUpdate } = useCart();
     const { logAction } = useActions();
     const [formValue, setFormValue] = useState(product || {
         name: '',
@@ -93,6 +95,7 @@ function ProductModal({ product, handleClose }) {
             
             if (formValue.id) {
                 await updateProduct(formValue);
+                updateCartByUpdate(formValue);
                 toast.success("Produto atualizado com sucesso!");
             } else {
                 await addProduct({

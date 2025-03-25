@@ -15,11 +15,11 @@ function NumericalInput ({ onUpdate, quantityValue, title, width = '45%', requir
                     event.target. value = quantityValue;
                 }
             }}
+            type='number'
             sx={{
                 width,
                 maxHeight: height
             }}
-            type='number'
             required={required}
             style={{ marginBottom: 16 }}
         />

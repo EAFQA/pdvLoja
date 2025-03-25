@@ -84,7 +84,7 @@ export const CartProvider = ({ children }) => {
         }
         return item;
       }
-    ));
+    )).filter(item => item.quantity > 0);
   };
 
   // Function to remove an item from the cart
@@ -114,8 +114,63 @@ export const CartProvider = ({ children }) => {
     setCart([]);
   };
 
+  const updateCartByStockAction = (stockAction) => {
+    const newCart = cart.map(item => {
+      const action = stockAction.find(action => action.id === item.id);
+      console.log(action);
+      if (action) {
+        const newQuantity = item.stockQuantity + action.incrementQuantity;
+
+        if (item.quantity > newQuantity) {
+          return {
+            ...item,
+            quantity: newQuantity,
+            stockQuantity: newQuantity
+          };
+        }
+
+        return {
+          ...item,
+          stockQuantity: newQuantity
+        };
+      }
+      return item;
+    }).filter(item => item.quantity > 0);
+  
+    setCart(newCart);
+  }
+
+  const updateCartByUpdate = (updatedItem) => {
+    const newCart = cart.map(item => {
+      if (item.id === updatedItem.id) {
+        return {
+          ...item,
+          price: updatedItem.price,
+          stockQuantity: updatedItem.stockQuantity,
+          minStockQuantity: updatedItem.minStockQuantity,
+          quantity: item.quantity > updatedItem.stockQuantity ? updatedItem.stockQuantity : item.quantity
+        };
+      }
+      return item;
+    }).filter(item => item.quantity > 0);
+
+    setCart(newCart);
+  }
+
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantityOnCart, buyCart, clearCart }}>
+    <CartContext.Provider 
+      value={{ 
+        cart, 
+        addToCart, 
+        removeFromCart, 
+        updateQuantityOnCart, 
+        buyCart, 
+        clearCart, 
+        updateCartByStockAction, 
+        updateCartByUpdate 
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

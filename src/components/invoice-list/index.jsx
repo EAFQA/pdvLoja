@@ -1,10 +1,10 @@
 import styled from 'styled-components';
 import { ImCart } from "react-icons/im";
-import { useCallback, useMemo } from 'react';
-import { MdAddBusiness, MdDelete } from "react-icons/md";
+import { useCallback, useMemo, useState } from 'react';
+import { MdAddBusiness, MdCheck, MdDelete, MdEdit } from "react-icons/md";
 import { ShortenText } from '../../utils';
-import { Button, IconButton, Tooltip } from '@mui/material';
-import { BiCartAdd } from "react-icons/bi";
+import { Button, IconButton, TextField, Tooltip } from '@mui/material';
+import { BiCartAdd, BiEdit } from "react-icons/bi";
 import { useCart } from '../../contexts/cart';
 import NumericalInput from '../numerical-input';
 import { IoMdAdd } from "react-icons/io";
@@ -60,6 +60,7 @@ function CartList() {
   const { cart, updateQuantityOnCart, removeFromCart, clearCart, buyCart } = useCart();
   const { logAction } = useActions();
   const { updateStock } = useProduct();
+  const [editingProduct, setEditingProduct] = useState(null);
 
   const total = useMemo(() => {
     return cart.reduce((acc, curr) => {
@@ -77,24 +78,58 @@ function CartList() {
                 <ProductItem key={product.id}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <IconButton 
-                        aria-label="delete-product" 
-                        style={{ fontSize: 24 }} 
-                        onClick={() => {
-                          if (product.quantity === 1)
-                          {
-                            removeFromCart(product.id);
-                            return;
+                      <div style={{ display: 'flex', alignItems: 'center', width: 80 }}>
+                          {(editingProduct?.id !== product.id) ? 
+                            (
+                              <>
+                                <IconButton 
+                                  aria-label="edit-product" 
+                                  style={{ fontSize: 24 }} 
+                                  onClick={() => {
+                                    setEditingProduct(product);
+                                  }}
+                                >
+                                    <MdEdit />
+                                </IconButton>
+                                <p>{product.quantity || "1"}</p>
+                              </>
+                          ) :
+                          (
+                            <>
+                              <IconButton 
+                                aria-label="edit-product" 
+                                style={{ fontSize: 24 }} 
+                                onClick={() => {
+                                  setEditingProduct(null);
+
+                                  if (editingProduct.quantity <= 0 || isNaN(editingProduct.quantity)) {
+                                    removeFromCart(editingProduct.id);
+                                    return;
+                                  }
+
+                                  updateQuantityOnCart(editingProduct.id, editingProduct.quantity);
+                                }}
+                              >
+                                  <MdCheck />
+                              </IconButton>
+                              <TextField 
+                                variant="standard"
+                                value={editingProduct.quantity}
+                                style={{ width: 70 }}
+                                onChange={(event) => {
+                                  const value = event.target.value;
+                                  if (!isNaN(value) && value >= 0 && !value.includes('e') && !value.includes('.')) {
+                                      setEditingProduct({ ...editingProduct, quantity: value })
+                                  } else {
+                                      event.target.value = quantityValue;
+                                  }
+                                }}
+                                type='number'
+                              />
+                            </>
+                          )
                           }
-                          updateQuantityOnCart(product.id, product.quantity - 1);
-                        }}
-                      >
-                          <IoMdRemove />
-                      </IconButton>
-                      <p style={{ margin: '0 6px' }}>{product.quantity || "1"}</p>
-                      <IconButton aria-label="delete-product" style={{ fontSize: 24 }} onClick={() => updateQuantityOnCart(product.id, product.quantity + 1)}>
-                          <IoMdAdd />
-                      </IconButton>
+                      </div>
                     </div>
                     <p style={{ textAlign: 'end', width: 'auto' }}>
                       {ShortenText(name, 20)} (R${(product.price || 10)?.toFixed(2).replace('.', ',')}) - 
