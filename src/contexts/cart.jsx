@@ -40,6 +40,15 @@ export const CartProvider = ({ children }) => {
 
             checkMinStock(product, item.quantity + 1);
 
+            const newQuantity = item.quantity + 1;
+
+            if (newQuantity > item.stockQuantity) {
+              return {
+                ...item,
+                quantity: item.stockQuantity
+              };
+            }
+
             return {
               ...item,
               quantity: item.quantity + 1

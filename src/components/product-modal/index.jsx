@@ -61,19 +61,15 @@ function ProductModal({ product, handleClose }) {
         minStockQuantity: null,
         maxStockQuantity: null,
         image: null,
-        categories: []
+        categories: [],
+        quantityType: 'unidade'
     });
-    const [file, setFile] = useState();
-
+    
     const handleImageChange = useCallback((e) => {
         if (!e?.target.files[0].type.includes('image')) {
             setFormValue({...formValue, image: null});
-            setFile(null);
             return;
         }
-
-        setFile(e.target.files[0]);
-        console.log(e.target.files[0]);
         setFormValue({
             ...formValue, 
             image: e.target.files[0],
@@ -198,15 +194,21 @@ function ProductModal({ product, handleClose }) {
             />
             
             <FlexContainer>
-                <NumericalInput 
-                    title="Quantidade Mínima em Estoque" 
-                    quantityValue={formValue.minStockQuantity}
-                    onUpdate={(value) => {
+                <Autocomplete
+                    disablePortal
+                    options={['unidade', 'kg', 'litro']}
+                    sx={{ 
+                        width: '45%'
+                    }}
+                    style={{ marginBottom: 16 }}
+                    value={formValue.quantityType}
+                    onChange={(_event, value) => {
                         setFormValue({
                             ...formValue,
-                            minStockQuantity: value
+                            quantityType: value
                         });
                     }}
+                    renderInput={(params) => <TextField {...params} fullWidth label="Categorias" />}
                 />
 
                 <NumericalInput 
@@ -220,11 +222,24 @@ function ProductModal({ product, handleClose }) {
                     }}
                     required
                     width='45%'
+                    allowFloat={['kg', 'litro'].includes(formValue.quantityType)}
                 />
                 
             </FlexContainer>
 
             <FlexContainer>
+                <NumericalInput 
+                    title="Quantidade Mínima em Estoque" 
+                    quantityValue={formValue.minStockQuantity}
+                    onUpdate={(value) => {
+                        setFormValue({
+                            ...formValue,
+                            minStockQuantity: value
+                        });
+                    }}
+                    allowFloat={['kg', 'litro'].includes(formValue.quantityType)}
+                />
+
                 <PriceInput 
                     title="Preço" 
                     priceValue={formValue.price}

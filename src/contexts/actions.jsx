@@ -29,7 +29,6 @@ export const ActionsProvider = ({ children }) => {
   const logAction = (action) => {
     const newActions = [action, ...actions];
     setActions(newActions);
-    console.log(newActions);
     saveData(newActions);
   };
 
@@ -59,38 +58,20 @@ export const ActionsProvider = ({ children }) => {
   const addItemsToAction = useCallback((itemId, name, value) => {
     const itemOnEdit = editingActionProducts.find(item => item.id === itemId);
 
-    const type = value < 0 ? 'decrease' : 'add';
-
     if (!itemOnEdit) {
-      setEditingActionProducts([...editingActionProducts, { id: itemId, name, quantity: Math.abs(value), type }]);
+      setEditingActionProducts([...editingActionProducts, { id: itemId, name, quantity: value }]);
       return;
     }
 
     const newEditingActionProducts = editingActionProducts.map(item => {
       if (item.id === itemId) {
-        if (item.quantity === 1 && ((item.type === 'decrease' && value > 0) || (item.type === 'add' && value < 0))) {
-          return { 
-            id: itemId,
-            name,
-            quantity: Math.abs(value), 
-            type: value < 0 ? 'decrease' : 'add' 
-          };
-        }
-
-        if (type !== item.type) {
-          return {
-            ...item,
-            quantity: item.quantity - Math.abs(value),
-          };
-        }
-
         return {
           ...item,
-          quantity: item.quantity + Math.abs(value)
+          quantity: value
         };
       }
       return item;
-    });
+    }).filter(item => item.quantity !== 0);
 
     setEditingActionProducts(newEditingActionProducts);
   }, [editingActionProducts]);
@@ -110,8 +91,8 @@ export const ActionsProvider = ({ children }) => {
       type: 'stock',
       products: editingActionProducts.map(item => ({
         id: item.id,
-        quantity: item.type === 'add' ? item.quantity : item.quantity * -1,
-      }))
+        quantity: item.quantity,
+      })).filter(item => item.quantity !== 0)
     }, ...actions];
     setActions(newActions);
     saveData(newActions);

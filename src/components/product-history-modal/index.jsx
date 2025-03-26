@@ -71,15 +71,24 @@ function ProductHistoryModal({ product, handleClose }) {
             
             const isPlural = productLog.quantity > 1 || productLog.quantity < -1;
 
+            const showDecimal = (value) => {
+                if (product.quantityType === 'kg' || product.quantityType === 'litro') {
+                    return value.toFixed(2);
+                }
+                return value;
+            }
+
+            const unity = ['litro', 'kg'].includes(product.quantityType) ? product.quantityType : 'unidade';
+
             if (log.type === 'sale')
             {
                 const total = productLog.quantity * product.price;
-                return `${dateString}Venda de ${productLog.quantity} unidade${isPlural ? 's' : ''} por R$${total.toFixed(2).replace('.', ',')}`;
+                return `${dateString}Venda de ${productLog.quantity} ${unity}${isPlural ? 's' : ''} por R$${total.toFixed(2).replace('.', ',')}`;
             }
 
             if (log.type === 'stock')
             {
-                return `${dateString}${productLog.quantity > 0 ? 'Adição' : 'Remoção'} de ${Math.abs(productLog.quantity)} unidade${isPlural ? 's' : ''} manualmente`;
+                return `${dateString}${productLog.quantity > 0 ? 'Adição' : 'Remoção'} de ${showDecimal(Math.abs(productLog.quantity))} ${unity}${isPlural ? 's' : ''} manualmente`;
             }
 
             return "";

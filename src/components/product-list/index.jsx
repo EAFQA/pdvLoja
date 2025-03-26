@@ -69,18 +69,6 @@ export const ProductImage = styled.div`
   align-items: start;
 `;
 
-const mockProds = [
-  {
-    id: '12312',
-    name: '123123',
-    price: 19.90,
-    stockQuantity: 3,
-    minStockQuantity: 1,
-    image: "https://cdnv2.moovin.com.br/sjo/imagens/produtos/det/-terco-de-madeira-sao-bento-759b5707fd223f32a843b70393f3564f.png",
-    categories: ['style']
-  }
-]
-
 function ProductList({ products }) {
   const { addToCart } = useCart();
   return (
@@ -88,6 +76,19 @@ function ProductList({ products }) {
         {products.map((product) => {
             const name = ShortenText(product.name || "Test with 150 characters", 14);
             const showTooltip = product.name?.length > 10;
+
+            const unityToShow = ['litro', 'kg'].includes(product.quantityType) ? product.quantityType : 'un';
+
+            const unityLabel = product.stockQuantity >= 2 ? `${unityToShow}s` : unityToShow;
+
+            const showDecimal = (value) => {
+              if (product.quantityType === 'kg' || product.quantityType === 'litro') {
+                  return value.toFixed(2);
+              }
+              return value;
+          }
+
+            const stockQuantity = product.stockQuantity ? `${showDecimal(product.stockQuantity)}`.replace('.', ',') : 0;
 
             return (
                 <ProductItem key={product.id} onClick={() => addToCart(product)}>
@@ -102,7 +103,7 @@ function ProductList({ products }) {
                             <p>{name}</p>
                         )}
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
-                            <p>{product.stockQuantity} un</p>
+                            <p>{stockQuantity} {unityLabel}</p>
                             <p>R${(product.price)?.toFixed(2).replace('.', ',')}</p>
                         </div>
                     </div>

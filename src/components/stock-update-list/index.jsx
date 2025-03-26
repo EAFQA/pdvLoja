@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 import { ImCart } from "react-icons/im";
-import { useCallback, useMemo } from 'react';
-import { MdAddBusiness, MdDelete } from "react-icons/md";
+import { useCallback, useMemo, useState } from 'react';
+import { MdAddBusiness, MdCheck, MdDelete, MdEdit } from "react-icons/md";
 import { ShortenText } from '../../utils';
-import { Button, IconButton, Tooltip } from '@mui/material';
+import { Button, IconButton, TextField, Tooltip } from '@mui/material';
 import { BiCartAdd } from "react-icons/bi";
 import { useCart } from '../../contexts/cart';
 import NumericalInput from '../numerical-input';
@@ -45,21 +45,87 @@ export const ProductImage = styled.div`
 `;
 
 function StockUpdateList() {
-  const { completeUpdate, editingActionProducts, removeItemFromAction, clearEditingActionProducts } = useActions();
-  const { updateStock } = useProduct();
+  const { completeUpdate, editingActionProducts, removeItemFromAction, addItemsToAction, clearEditingActionProducts } = useActions();
+  const { updateStock, products } = useProduct();
   const { updateCartByStockAction } = useCart();
+  const [editingProduct, setEditingProduct] = useState(null);
 
   return (
     <ProductContainer>
       <div style={{ height: 'calc(90vh - 270px)', backgroundColor: '#DDDDDD', border: '4px solid black', borderRadius: '8px' }}>
         {editingActionProducts.map((product) => {
-            const name = product.name;
+            const prd = products.find(p => p.id === product.id);
+            const name = prd.name;
+            const unityToShow = ['litro', 'kg'].includes(prd.quantityType) ? prd.quantityType : 'un';
+
+            const unityLabel = product.quantity >= 2 ? `${unityToShow}s` : unityToShow;
+
+            const showDecimal = (value) => {
+              if (product.quantityType === 'kg' || product.quantityType === 'litro') {
+                  return value.toFixed(2);
+              }
+              return value;
+          }
+
+            const stockQuantity = product.quantity ? `${showDecimal(product.quantity)}`.replace('.', ',') : 0;
 
             return (
                 <ProductItem key={product.id}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <p style={{ margin: '0 6px' }}>{product.type === 'add' ? '+' : '-'}{product.quantity || "1"}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', width: 148 }}>
+                        {(editingProduct?.id !== product.id) ? 
+                          (
+                            <>
+                              <IconButton 
+                                aria-label="edit-product" 
+                                style={{ fontSize: 24, width: 48 }} 
+                                onClick={() => {
+                                  setEditingProduct(product);
+                                }}
+                              >
+                                  <MdEdit />
+                              </IconButton>
+                              <p style={{ width: 100 }}>{stockQuantity} {unityLabel}</p>
+                            </>
+                        ) :
+                        (
+                          <>
+                            <IconButton 
+                              aria-label="edit-product" 
+                              style={{ fontSize: 24, width: 48 }} 
+                              onClick={() => {
+                                setEditingProduct(null);
+
+                                console.log(editingProduct);
+
+                                if (editingProduct.quantity === 0 || isNaN(editingProduct.quantity)) {
+                                  removeFromCart(editingProduct.id);
+                                  return;
+                                }
+
+                                addItemsToAction(editingProduct.id, product.name, Number(editingProduct.quantity));
+                              }}
+                            >
+                                <MdCheck />
+                            </IconButton>
+                            <TextField 
+                              variant="standard"
+                              value={editingProduct.quantity}
+                              style={{ width: 70 }}
+                              onChange={(event) => {
+                                const allowFloat = ['kg', 'litro'].includes(product.quantityType);
+                                const value = event.target.value;
+                                
+                                if (!isNaN(value) && (allowFloat || (!value.includes('e') && !value.includes('.')))) {
+                                    setEditingProduct({ ...editingProduct, quantity: value })
+                                } else {
+                                    event.target.value = quantityValue;
+                                }
+                              }}
+                              type='number'
+                            />
+                          </>
+                        )}
                     </div>
                     <p style={{ textAlign: 'end', width: 'auto' }}>
                       {ShortenText(name, 40)}
@@ -90,7 +156,7 @@ function StockUpdateList() {
                   onClick={() => {
                     const stockAction = editingActionProducts.map(item => ({
                       id: item.id,
-                      incrementQuantity: item.type === 'add' ? item.quantity : item.quantity * -1,
+                      incrementQuantity: item.quantity
                     }));
                     updateStock(stockAction);
                     updateCartByStockAction(stockAction);

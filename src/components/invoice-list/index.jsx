@@ -74,31 +74,44 @@ function CartList() {
         {cart.map((product) => {
             const name = product.name;
 
+            const unityToShow = ['litro', 'kg'].includes(product.quantityType) ? product.quantityType : 'un';
+
+            const unityLabel = product.quantity >= 2 ? `${unityToShow}s` : unityToShow;
+
+            const showDecimal = (value) => {
+              if (product.quantityType === 'kg' || product.quantityType === 'litro') {
+                  return value.toFixed(2);
+              }
+              return value;
+          }
+
+            const stockQuantity = product.quantity ? `${showDecimal(product.quantity)}`.replace('.', ',') : 0;
+
             return (
                 <ProductItem key={product.id}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', width: 80 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', width: 148 }}>
                           {(editingProduct?.id !== product.id) ? 
                             (
                               <>
                                 <IconButton 
                                   aria-label="edit-product" 
-                                  style={{ fontSize: 24 }} 
+                                  style={{ fontSize: 24, width: 48 }} 
                                   onClick={() => {
                                     setEditingProduct(product);
                                   }}
                                 >
                                     <MdEdit />
                                 </IconButton>
-                                <p>{product.quantity || "1"}</p>
+                                <p style={{ width: 100}}>{stockQuantity} {unityLabel}</p>
                               </>
                           ) :
                           (
                             <>
                               <IconButton 
                                 aria-label="edit-product" 
-                                style={{ fontSize: 24 }} 
+                                style={{ fontSize: 24, width: 48 }} 
                                 onClick={() => {
                                   setEditingProduct(null);
 
@@ -107,7 +120,7 @@ function CartList() {
                                     return;
                                   }
 
-                                  updateQuantityOnCart(editingProduct.id, editingProduct.quantity);
+                                  updateQuantityOnCart(editingProduct.id, Number(editingProduct.quantity));
                                 }}
                               >
                                   <MdCheck />
@@ -117,8 +130,10 @@ function CartList() {
                                 value={editingProduct.quantity}
                                 style={{ width: 70 }}
                                 onChange={(event) => {
+                                  const allowFloat = ['litro', 'kg'].includes(product.quantityType);
                                   const value = event.target.value;
-                                  if (!isNaN(value) && value >= 0 && !value.includes('e') && !value.includes('.')) {
+                                  
+                                  if (!isNaN(value) && value >= 0 && (allowFloat || (!value.includes('e') && !value.includes('.')))) {
                                       setEditingProduct({ ...editingProduct, quantity: value })
                                   } else {
                                       event.target.value = quantityValue;
@@ -127,8 +142,7 @@ function CartList() {
                                 type='number'
                               />
                             </>
-                          )
-                          }
+                          )}
                       </div>
                     </div>
                     <p style={{ textAlign: 'end', width: 'auto' }}>
@@ -146,38 +160,38 @@ function CartList() {
       <div style={{ marginTop: 'auto', textAlign: 'end', fontSize: 22, fontWeight: 'bold' }}>
         <p>Total: R${total}</p>
         <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-around' }}>
-        <Button 
-                  variant="contained" 
-                  style={{ marginTop: 16, backgroundColor: '#ed2939' }}
-                  size="large"
-                  onClick={() => clearCart()}
-              >
-                  Desfazer carrinho
-              </Button>
+          <Button 
+              variant="contained" 
+              style={{ marginTop: 16, backgroundColor: '#ed2939' }}
+              size="large"
+              onClick={() => clearCart()}
+          >
+              Desfazer carrinho
+          </Button>
 
-              <Button 
-                  variant="contained" 
-                  style={{ marginTop: 16, backgroundColor: cart.length ? '#1DBC60' : '#d3d3d3' }}
-                  size="large"
-                  onClick={() => {
-                    if (!cart.length) return;
-                    const stockAction = cart.map(item => ({
-                      id: item.id,
-                      incrementQuantity: item.quantity * -1,
-                    }));
+          <Button 
+              variant="contained" 
+              style={{ marginTop: 16, backgroundColor: cart.length ? '#1DBC60' : '#d3d3d3' }}
+              size="large"
+              onClick={() => {
+                if (!cart.length) return;
+                const stockAction = cart.map(item => ({
+                  id: item.id,
+                  incrementQuantity: item.quantity * -1,
+                }));
 
-                    const response = buyCart();
-                    
-                    if (response) {
-                      toast.success('Venda efetuada com sucesso!');
-                      updateStock(stockAction);
-                      logAction(response);
-                      clearCart();
-                    }
-                  }}
-              >
-                  Efetuar venda
-              </Button>
+                const response = buyCart();
+                
+                if (response) {
+                  toast.success('Venda efetuada com sucesso!');
+                  updateStock(stockAction);
+                  logAction(response);
+                  clearCart();
+                }
+              }}
+          >
+              Efetuar venda
+          </Button>
         </div>
       </div>
     </ProductContainer>

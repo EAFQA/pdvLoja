@@ -76,13 +76,27 @@ export const ProductImage = styled.div`
 
 function ProductStockList({ products, onEditProduct, onDeleteProduct, onShowProductHistory }) {
   const {
-    addItemsToAction
+    addItemsToAction,
+    editingActionProducts,
   } = useActions();
   return (
     <ProductContainer>
         {products.map((product) => {
             const name = ShortenText(product.name || "Test with 150 characters", 14);
             const showTooltip = product.name?.length > 10;
+
+            const unityToShow = ['litro', 'kg'].includes(product.quantityType) ? product.quantityType : 'un';
+
+            const unityLabel = product.stockQuantity >= 2 ? `${unityToShow}s` : unityToShow;
+
+            const showDecimal = (value) => {
+              if (product.quantityType === 'kg' || product.quantityType === 'litro') {
+                  return value.toFixed(2);
+              }
+              return value;
+          }
+
+            const stockQuantity = product.stockQuantity ? `${showDecimal(product.stockQuantity)}`.replace('.', ',') : 0;
 
             return (
                 <ProductItem key={product.id}>
@@ -123,15 +137,33 @@ function ProductStockList({ products, onEditProduct, onDeleteProduct, onShowProd
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <IconButton onClick={() => {
-                        addItemsToAction(product.id, product.name, -1);
+                        const item = editingActionProducts.find(item => item.id === product.id);
+                        
+                        const quantityToIncrease = item ? item.quantity + -1 : -1;
+
+                        if (Math.abs(quantityToIncrease) > product.stockQuantity) {
+                          addItemsToAction(product.id, product.name, -1 * product.stockQuantity);
+                          return;
+                        }
+
+                        addItemsToAction(product.id, product.name, quantityToIncrease);
                       }}>
                         <IoMdRemove />
                       </IconButton>
 
-                      <p>{product.stockQuantity} un</p>
+                      <p>{stockQuantity} {unityLabel}</p>
 
                       <IconButton onClick={() => {
-                        addItemsToAction(product.id, product.name, 1);
+                        const item = editingActionProducts.find(item => item.id === product.id);
+                        
+                        const quantityToIncrease = item ? item.quantity + 1 : 1;
+
+                        if (quantityToIncrease > product.stockQuantity) {
+                          addItemsToAction(product.id, product.name, product.stockQuantity);
+                          return;
+                        }
+
+                        addItemsToAction(product.id, product.name, quantityToIncrease);
                       }}>
                         <IoMdAdd />
                       </IconButton>
