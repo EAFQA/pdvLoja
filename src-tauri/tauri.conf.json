@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "tauri-app",
+  "productName": "Ponto de Venda - Artigos Asas De Anjo",
   "version": "0.2.0",
-  "identifier": "com.tauri-app.app",
+  "identifier": "com.pdv-asas-de-anjo.app",
   "build": {
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "yarn build",
@@ -11,7 +11,7 @@
   "app": {
     "windows": [
       {
-        "title": "Ponto de Venda",
+        "title": "Ponto de Venda - Artigos Asas de Anjo",
         "width": 1340,
         "minWidth": 1340,
         "height": 670,
@@ -35,11 +35,8 @@
     "active": true,
     "targets": "all",
     "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
+      "icons/icon.ico",
+      "icons/32x32.png"
     ]
   }
 }

@@ -29,6 +29,8 @@ export const ProductItem = styled.div`
   width: 100%;
   text-align: center;
   min-height: 55px;
+  display: flex;
+  align-items: center;
   background-color: ${(props) => props.isOdd ? '#EEEEEE' : '#DDDDD'}
 `;
 

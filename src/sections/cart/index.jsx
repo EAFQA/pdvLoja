@@ -99,7 +99,7 @@ function Cart () {
         <ProductsContainer>
             <SearchContainer>
                 <TextField 
-                    style={{ width: 250 }} 
+                    style={{ width: '25%' }} 
                     value={searchName} 
                     onChange={(e) => setSearchName(e.target.value)}
                     id="search-by-name" 
@@ -116,21 +116,22 @@ function Cart () {
                     onChange={(_event, newValue) => {
                         setOrder(newValue);
                     }}
-                    sx={{ width: 200 }}
+                    sx={{ width: '30%', maxWidth: 200 }}
                     renderInput={(params) => <TextField {...params} label="Ordem" />}
                 />
                 <Autocomplete
                     disablePortal
                     options={categoriesToSelect}
                     multiple
+                    limitTags={1}
                     value={categories}
                     onChange={(_event, newValue) => {
                         setCategories(newValue);
                     }}
                     sx={{ 
-                        width: 300
+                        width: '30%',
+                        maxHeight: 56
                      }}
-                     style={{ maxHeight: 56 }}
                     renderInput={(params) => <TextField {...params} label="Categorias" />}
                 />
                 <Tooltip title="Criar novo produto">

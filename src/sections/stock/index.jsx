@@ -106,7 +106,7 @@ function Stock () {
         <ProductsContainer>
             <SearchContainer>
                 <TextField 
-                    style={{ width: 250 }} 
+                    style={{ width: '25%' }} 
                     value={searchName} 
                     onChange={(e) => setSearchName(e.target.value)} 
                     id="search-by-name" 
@@ -123,7 +123,7 @@ function Stock () {
                     onChange={(_event, newValue) => {
                         setOrder(newValue);
                     }}
-                    sx={{ width: 200 }}
+                    sx={{ width: '30%', maxWidth: 200 }}
                     renderInput={(params) => <TextField {...params} label="Ordem" />}
                 />
                 <Autocomplete
@@ -135,9 +135,9 @@ function Stock () {
                         setCategories(newValue);
                     }}
                     sx={{ 
-                        width: 300
-                     }}
-                     style={{ maxHeight: 56 }}
+                        width: '30%',
+                        maxHeight: 56
+                    }}
                     renderInput={(params) => <TextField {...params} label="Categorias" />}
                 />
                 <Tooltip title="Criar novo produto">
