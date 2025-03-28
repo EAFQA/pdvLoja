@@ -12,13 +12,14 @@ import { IoMdRemove } from "react-icons/io";
 import { useActions } from '../../contexts/actions';
 import { useProduct } from '../../contexts/product';
 import { toast } from 'react-toastify';
-
+import ConfirmModal from '../confirm-modal';
 
 export const ProductContainer = styled.div`
   margin-top: 16px;
   align-self: start;
   width: 100%;
   height: calc(90vh - 56px);
+  overflow: auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -28,39 +29,16 @@ export const ProductItem = styled.div`
   background: #FFFFF;
   width: 100%;
   text-align: center;
-  height: 50px;
+  min-height: 55px;
   background-color: ${(props) => props.isOdd ? '#DDDDD' : '#EEEEEE'}
 `;
-
-export const ProductImage = styled.div`
-  margin-bottom: 10px;
-  background-image: url(${(props) => props.src});
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  height: 160px;
-  width: 100%;
-  display: flex;
-  justify-content: end;
-  align-items: start;
-`;
-
-const mockProds = [
-  {
-    id: '12312',
-    name: '123123',
-    price: 19.90,
-    stockQuantity: 3,
-    minStockQuantity: 1,
-    image: "https://cdnv2.moovin.com.br/sjo/imagens/produtos/det/-terco-de-madeira-sao-bento-759b5707fd223f32a843b70393f3564f.png",
-    categories: ['style']
-  }
-]
 
 function CartList() {
   const { cart, updateQuantityOnCart, removeFromCart, clearCart, buyCart } = useCart();
   const { logAction } = useActions();
   const { updateStock } = useProduct();
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const total = useMemo(() => {
     return cart.reduce((acc, curr) => {
@@ -68,10 +46,11 @@ function CartList() {
     }, 0).toFixed(2).replace('.', ',');
   }, [cart]);
 
+
   return (
     <ProductContainer>
-      <div style={{ height: 'calc(90vh - 270px)', backgroundColor: '#DDDDDD', border: '4px solid black', borderRadius: '8px' }}>
-        {cart.map((product) => {
+      <div style={{ height: 'calc(90vh - 270px)', overflow: 'auto', backgroundColor: '#DDDDDD', border: '4px solid black', borderRadius: '8px' }}>
+        {cart.map((product, index) => {
             const name = product.name;
 
             const unityToShow = ['litro', 'kg'].includes(product.quantityType) ? product.quantityType : 'un';
@@ -88,7 +67,7 @@ function CartList() {
             const stockQuantity = product.quantity ? `${showDecimal(product.quantity)}`.replace('.', ',') : 0;
 
             return (
-                <ProductItem key={product.id}>
+                <ProductItem key={product.id} isOdd={index % 2}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', width: 148 }}>
@@ -133,7 +112,7 @@ function CartList() {
                                   const allowFloat = ['litro', 'kg'].includes(product.quantityType);
                                   const value = event.target.value;
                                   
-                                  if (!isNaN(value) && value >= 0 && (allowFloat || (!value.includes('e') && !value.includes('.')))) {
+                                  if (!isNaN(value) && value >= 0 && value < 10000000 && (allowFloat || (!value.includes('e') && !value.includes('.')))) {
                                       setEditingProduct({ ...editingProduct, quantity: value })
                                   } else {
                                       event.target.value = quantityValue;
@@ -159,12 +138,16 @@ function CartList() {
       </div>
       <div style={{ marginTop: 'auto', textAlign: 'end', fontSize: 22, fontWeight: 'bold' }}>
         <p>Total: R${total}</p>
-        <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-around' }}>
+        <div style={{ marginTop: '10px', height: 80, display: 'flex', justifyContent: 'space-around' }}>
           <Button 
               variant="contained" 
               style={{ marginTop: 16, backgroundColor: '#ed2939' }}
               size="large"
-              onClick={() => clearCart()}
+              onClick={() => {
+                if (cart.length) {
+                  setShowDeleteModal(true);
+                }
+              }}
           >
               Desfazer carrinho
           </Button>
@@ -194,6 +177,17 @@ function CartList() {
           </Button>
         </div>
       </div>
+      {showDeleteModal && (
+        <ConfirmModal 
+          title="Desfazer carrinho"
+          text="Ao desfazer o carrinho, toda a lista de produtos atuais será apagada."
+          onConfirm={() => {
+            clearCart();
+            setShowDeleteModal(false);
+          }}
+          handleClose={() => setShowDeleteModal(false)}
+        />
+      )}
     </ProductContainer>
   );
 }

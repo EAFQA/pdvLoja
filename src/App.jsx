@@ -29,7 +29,7 @@ function App() {
             </div>
             <div 
               style={{ 
-                width: 'calc(100% - 112px)', 
+                width: 'calc(100vw - 112px)', 
                 height: '100vh', 
                 background: '#D8D8D6', 
                 display: 'flex', 

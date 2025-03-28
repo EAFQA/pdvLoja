@@ -17,7 +17,8 @@ const Container = styled.div`
     align-items: center;
     background-color: #FFFFFF;
     border-radius: 8px;
-    min-height: 600px;
+    height: 500px;
+    overflow: auto;
     width: 600px;
 `;
 
@@ -67,7 +68,7 @@ function ProductModal({ product, handleClose }) {
     
     const handleImageChange = useCallback((e) => {
         if (!e?.target.files[0].type.includes('image')) {
-            setFormValue({...formValue, image: null});
+            setFormValue({...formValue, image: undefined, imageUrl: undefined });
             return;
         }
         setFormValue({
@@ -208,7 +209,7 @@ function ProductModal({ product, handleClose }) {
                             quantityType: value
                         });
                     }}
-                    renderInput={(params) => <TextField {...params} fullWidth label="Categorias" />}
+                    renderInput={(params) => <TextField {...params} fullWidth label="Tipo de Estoque" />}
                 />
 
                 <NumericalInput 

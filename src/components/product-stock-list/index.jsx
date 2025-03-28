@@ -136,10 +136,10 @@ function ProductStockList({ products, onEditProduct, onDeleteProduct, onShowProd
                         </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <IconButton onClick={() => {
+                      <IconButton disabled={!product.stockQuantity} onClick={() => {
                         const item = editingActionProducts.find(item => item.id === product.id);
                         
-                        const quantityToIncrease = item ? item.quantity + -1 : -1;
+                        const quantityToIncrease = item ? Number((item.quantity - 1).toFixed(2)) : -1;
 
                         if (Math.abs(quantityToIncrease) > product.stockQuantity) {
                           addItemsToAction(product.id, product.name, -1 * product.stockQuantity);
@@ -156,12 +156,7 @@ function ProductStockList({ products, onEditProduct, onDeleteProduct, onShowProd
                       <IconButton onClick={() => {
                         const item = editingActionProducts.find(item => item.id === product.id);
                         
-                        const quantityToIncrease = item ? item.quantity + 1 : 1;
-
-                        if (quantityToIncrease > product.stockQuantity) {
-                          addItemsToAction(product.id, product.name, product.stockQuantity);
-                          return;
-                        }
+                        const quantityToIncrease = item ? Number((item.quantity + 1).toFixed(2)) : 1;
 
                         addItemsToAction(product.id, product.name, quantityToIncrease);
                       }}>

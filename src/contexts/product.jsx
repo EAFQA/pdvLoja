@@ -1,17 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { exists, BaseDirectory, readFile, readTextFile, writeTextFile, writeFile, mkdir } from '@tauri-apps/plugin-fs';
-import * as path from '@tauri-apps/api/path';
-import { Buffer } from "buffer";
 import { map } from 'radash';
 //onst { exists, BaseDirectory } = window.__TAURI__.fs;
 
 // Create the ProductContext
 const ProductContext = createContext();
 
-const getDbName = async () => {
-  return "pdv-produtos.json";
-}
-const imagePath = "pdv-images/";
+const dbName = "pdv/pdv-produtos.json";
+const imagePath = "pdv/pdv-images/";
 
 const config = {
   baseDir: BaseDirectory.Document
@@ -37,9 +33,7 @@ export const ProductProvider = ({ children }) => {
       }, []);
   }, [products]);
 
-  const loadData = useCallback(async () => {
-    const dbName = await getDbName();
-    
+  const loadData = useCallback(async () => {    
     try {
       const existingDB = await readTextFile(dbName, config);
   
@@ -53,7 +47,13 @@ export const ProductProvider = ({ children }) => {
             async item => {
               try {
                 if (!item.image) return item;
-                const imageFile = await readFile(item.image, config);
+                let currImagePath = item.image;
+
+                if (!currImagePath.includes(imagePath)) {
+                  currImagePath = `pdv/${currImagePath}`;
+                }
+
+                const imageFile = await readFile(currImagePath, config);
                 
                 return {
                   ...item,
@@ -126,8 +126,6 @@ export const ProductProvider = ({ children }) => {
   }, []);
 
   const saveData = useCallback(async (newProducts) => {
-    const dbName = await getDbName();
-
     await writeTextFile(dbName, JSON.stringify(newProducts), config);
   }, []);
 

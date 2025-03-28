@@ -1,21 +1,24 @@
 import styled from 'styled-components';
 import { ImCart } from "react-icons/im";
-import { useCallback, useMemo, useState } from 'react';
-import { MdAddBusiness, MdAddCircleOutline } from "react-icons/md";
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { MdAddBusiness, MdAddCircleOutline, MdCreate } from "react-icons/md";
 import TextField from '@mui/material/TextField';
-import { Autocomplete, FormControl, IconButton, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import { Autocomplete, FormControl, IconButton, InputLabel, MenuItem, Select, Tooltip, Typography } from '@mui/material';
 import { IoAddCircleSharp } from "react-icons/io5";
 import ProductModal from '../../components/product-modal';
 import { useProduct } from '../../contexts/product';
 import ProductList from '../../components/product-list';
 import CartList from '../../components/invoice-list';
+import { AiFillProduct } from "react-icons/ai";
+import { CgGift } from "react-icons/cg";
+import { BsBoxes } from "react-icons/bs";
 
 const PageContainer = styled.div`
     display: flex;
     align-content: space-between;
     align-items: center;
-    padding: 0 32px;
-    width: 100%;
+    padding: 0 16px;
+    width: calc(100vw - 144px);
 `;
 
 
@@ -26,8 +29,8 @@ const ProductsContainer = styled.div`
     flex-direction: column;
     align-content: space-between;
     align-items: center;
-    height: 90vh;
-    width: 70%;
+    height: 93vh;
+    width: 60%;
     background: #FFFFFF;
 `;
 
@@ -48,9 +51,9 @@ const CartContainer = styled.div`
     flex-direction: column;
     align-content: space-between;
     align-items: center;
-    height: 90vh;
+    height: 93vh;
     margin-left: 1%;
-    width: 29%;
+    width: calc(39% - 32px);
     background: #FFFFFF;
 `;
 
@@ -60,6 +63,7 @@ function Cart () {
     const [categories, setCategories] = useState([]);
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [searchName, setSearchName] = useState('');
+    const cartContainerRef = useRef();
 
     const filteredProducts = useMemo(() => {
         const filterByCategory = (prds) => {
@@ -129,18 +133,20 @@ function Cart () {
                      style={{ maxHeight: 56 }}
                     renderInput={(params) => <TextField {...params} label="Categorias" />}
                 />
-                <IconButton aria-label="new-product" style={{ color: '#6baed6', fontSize: 40 }} onClick={() => setIsProductModalOpen(true)}>
-                    <IoAddCircleSharp />
-                </IconButton>
+                <Tooltip title="Criar novo produto">
+                    <IconButton aria-label="new-product" style={{ color: '#6baed6', fontSize: 40 }} onClick={() => setIsProductModalOpen(true)}>
+                        <BsBoxes />
+                    </IconButton>
+                </Tooltip>
             </SearchContainer>
 
             <ProductList products={filteredProducts} />
         </ProductsContainer>
-        <CartContainer>
+        <CartContainer ref={cartContainerRef}>
             <SearchContainer>
-                <Typography variant='h3' style={{ textAlign: 'center', width: '100%' }}>Resumo</Typography>
+                <Typography variant='h4' style={{ textAlign: 'center', width: '100%' }}>Carrinho</Typography>
             </SearchContainer>
-            <CartList />
+            <CartList cartContainerRef={cartContainerRef} />
         </CartContainer>
         {
             isProductModalOpen && 

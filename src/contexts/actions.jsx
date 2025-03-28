@@ -4,9 +4,7 @@ import {  BaseDirectory, readTextFile, writeTextFile } from '@tauri-apps/plugin-
 // Create the ProductContext
 const ActionsContext = createContext();
 
-const getDbName = async () => {
-  return "pdv-actions.json";
-}
+const dbName = "pdv/pdv-actions.json";
 
 const config = {
   baseDir: BaseDirectory.Document
@@ -19,8 +17,6 @@ export const ActionsProvider = ({ children }) => {
   const [editingActionProducts, setEditingActionProducts] = useState([]);
 
   const saveData = useCallback(async (newActions) => {
-    const dbName = await getDbName();
-
     await writeTextFile(dbName, JSON.stringify(newActions), config);
     console.log('done');
   }, []);
@@ -32,9 +28,7 @@ export const ActionsProvider = ({ children }) => {
     saveData(newActions);
   };
 
-  const loadData = useCallback(async () => {
-    const dbName = await getDbName();
-    
+  const loadData = useCallback(async () => {    
     try {
       const existingDB = await readTextFile(dbName, config);
   
