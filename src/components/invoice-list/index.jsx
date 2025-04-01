@@ -1,14 +1,8 @@
 import styled from 'styled-components';
-import { ImCart } from "react-icons/im";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { MdAddBusiness, MdCheck, MdDelete, MdEdit } from "react-icons/md";
-import { ShortenText } from '../../utils';
-import { Button, IconButton, TextField, Tooltip } from '@mui/material';
-import { BiCartAdd, BiEdit } from "react-icons/bi";
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { MdCheck, MdDelete, MdEdit } from "react-icons/md";
+import { Button, IconButton, TextField } from '@mui/material';
 import { useCart } from '../../contexts/cart';
-import NumericalInput from '../numerical-input';
-import { IoMdAdd } from "react-icons/io";
-import { IoMdRemove } from "react-icons/io";
 import { useActions } from '../../contexts/actions';
 import { useProduct } from '../../contexts/product';
 import { toast } from 'react-toastify';
