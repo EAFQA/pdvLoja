@@ -14,7 +14,7 @@ function PriceInput ({ onUpdate, priceValue, title, required = false }) {
             }}
             onChange={(event) => {
                 const value = event.target.value;
-                if (!isNaN(value) && value >= 0 && value < 10000000 && !value.includes('e')) {
+                if (!isNaN(value) && value >= 0 && value < 9999.99 && !value.includes('e')) {
                     if (value.includes('.')) {
                         const decimal = value.split('.')[1];
                         if (decimal?.length > 2) return;

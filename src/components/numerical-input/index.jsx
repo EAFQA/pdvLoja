@@ -9,7 +9,7 @@ function NumericalInput ({ onUpdate, quantityValue, title, width = '45%', requir
             value={quantityValue}
             onChange={(event) => {
                 const value = event.target.value;
-                if (!isNaN(value) && value >= 0 && value < 10000000 && (allowFloat || (!value.includes('e') && !value.includes('.')))) {
+                if (!isNaN(value) && value >= 0 && value < 9999.99 && (allowFloat || (!value.includes('e') && !value.includes('.')))) {
                     onUpdate(event.target.value);
                 } else {
                     event.target. value = quantityValue;

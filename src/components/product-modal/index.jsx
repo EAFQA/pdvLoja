@@ -166,10 +166,16 @@ function ProductModal({ product, handleClose }) {
                 label="Nome" 
                 variant="outlined" 
                 value={formValue.name} 
-                onChange={(event) => setFormValue({
-                    ...formValue,
-                    name: event.target.value
-                })}
+                onChange={(event) => {
+                    if (event.target.value?.length > 70) {
+                        event.target.value = formValue.name;
+                        return;
+                    }
+                    setFormValue({
+                        ...formValue,
+                        name: event.target.value
+                    });
+                }}
                 fullWidth
                 style={{ marginBottom: 16 }}
                 required
