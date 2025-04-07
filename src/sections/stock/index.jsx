@@ -74,7 +74,7 @@ function Stock () {
 
     const filteredProducts = useMemo(() => {
         const filterByCategory = (prds) => {
-            return prds.filter(prd => categories.every(cat => prd.categories.includes(cat)));
+            return prds.filter(prd => prd.category && categories.includes(prd.category));
         }
 
         const filterByName = (prds) => {

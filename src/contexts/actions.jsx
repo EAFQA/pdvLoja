@@ -18,7 +18,6 @@ export const ActionsProvider = ({ children }) => {
 
   const saveData = useCallback(async (newActions) => {
     await writeTextFile(dbName, JSON.stringify(newActions), config);
-    console.log('done');
   }, []);
 
   // Function to log an action

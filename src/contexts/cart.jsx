@@ -114,7 +114,6 @@ export const CartProvider = ({ children }) => {
       date: new Date().toISOString()
     };
 
-    console.log(newSale);
     return newSale;
   };
 
@@ -126,7 +125,6 @@ export const CartProvider = ({ children }) => {
   const updateCartByStockAction = (stockAction) => {
     const newCart = cart.map(item => {
       const action = stockAction.find(action => action.id === item.id);
-      console.log(action);
       if (action) {
         const newQuantity = item.stockQuantity + action.incrementQuantity;
 

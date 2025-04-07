@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -11,6 +10,7 @@ import { CartProvider } from "./contexts/cart";
 import { ActionsProvider } from "./contexts/actions";
 import { ProductProvider } from "./contexts/product";
 import Stock from "./sections/stock";
+import Categories from "./sections/categories";
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState('cart');
@@ -38,7 +38,15 @@ function App() {
               }}
             >
               {
-                currentRoute === 'cart' ? <Cart /> : <Stock />
+                currentRoute === 'cart' && <Cart />
+              }
+
+              {
+                currentRoute === 'stock' && <Stock />
+              }
+
+              {
+                currentRoute === 'category' && <Categories />
               }
             </div>
           </ProductProvider>

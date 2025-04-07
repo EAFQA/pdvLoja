@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { ImCart } from "react-icons/im";
 import { useCallback, useMemo } from 'react';
 import { MdAddBusiness } from "react-icons/md";
+import { MdCategory } from "react-icons/md";
 
 const Container = styled.div`
     display: flex;
@@ -42,6 +43,12 @@ function Menu({ handleRouteChange, currentRoute }) {
         color: getSectionColor('stock'),
     }), [currentRoute, getSectionColor]);
 
+    const categoryManagementStyle = useMemo(() => ({
+        height: 40,
+        width: 40,
+        color: getSectionColor('category'),
+    }), [currentRoute, getSectionColor]);
+
   return (
     <Container>
         <MenuItem onClick={() => handleRouteChange('cart')}>
@@ -51,6 +58,10 @@ function Menu({ handleRouteChange, currentRoute }) {
         <MenuItem onClick={() => handleRouteChange('stock')}>
             <MdAddBusiness style={stockManagementStyle}/>
             <p style={{ color: stockManagementStyle.color, margin: 0 }}>Estoque</p>
+        </MenuItem>
+        <MenuItem onClick={() => handleRouteChange('category')}>
+            <MdCategory style={categoryManagementStyle}/>
+            <p style={{ color: categoryManagementStyle.color, margin: 0 }}>Categorias</p>
         </MenuItem>
     </Container>
   );
