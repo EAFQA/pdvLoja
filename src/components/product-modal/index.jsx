@@ -199,7 +199,7 @@ function ProductModal({ product, handleClose }) {
                                     category: value
                                 });
                             }}
-                            renderInput={(params) => <TextField {...params} fullWidth label="Category" />}
+                            renderInput={(params) => <TextField {...params} fullWidth label="Categoria" />}
                         />
                     </div>
 

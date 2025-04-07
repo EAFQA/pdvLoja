@@ -92,6 +92,8 @@ function NewCategoryModal({ handleClose, categoryValue }) {
                 fullWidth
                 style={{ marginBottom: 16 }}
                 required
+                type="search"
+                autoComplete='off'
             />
 
             <FlexContainer style={{ marginTop: 'auto', justifyContent: 'space-around' }}>

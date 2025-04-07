@@ -54,7 +54,7 @@ function Categories () {
             searchName ? filterByName : null,
         ].filter(Boolean).reduce((acc, execFun) => {
             return execFun(acc);
-        }, categoriesToSelect);
+        }, categoriesToSelect).sort();
     }, [categoriesToSelect, searchName]);
 
     return (
@@ -69,6 +69,8 @@ function Categories () {
                             id="search-by-name" 
                             label="Nome da Categoria" 
                             variant="outlined"
+                            autoComplete='off'
+                            type="search"
                         />
                         
                         <Tooltip title="Criar nova categoria">
