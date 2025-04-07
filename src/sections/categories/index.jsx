@@ -112,9 +112,12 @@ function Categories () {
             </PageContainer>
             {categoryModalOpen && (
                 <NewCategoryModal 
-                    handleClose={() => {
+                    handleClose={(newValue) => {
                         setCategoryModalOpen(false);
                         setCategoryToUpdate(null);
+                        if (newValue) {
+                            setSearchName('');
+                        }
                     }}
                     categoryValue={categoryToUpdate}
                 />

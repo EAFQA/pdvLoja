@@ -196,7 +196,18 @@ export const ProductProvider = ({ children }) => {
       const previousProductsCategories = 
         products
           .filter(item => item.id !== "product-categories")
-          .map(item => item.categories)
+          .map(item => {
+            const value = item.categories;
+
+            if (typeof value === 'string') {
+              return value;
+            }
+            
+            if (typeof value === 'object') {
+              return Object.values(value || {})?.[0];
+            }
+          })
+          .filter(item => typeof item === 'string')
           .flat();
 
       const newProduct = {
@@ -220,7 +231,7 @@ export const ProductProvider = ({ children }) => {
       if (item.id === product.id) {
         return {
           ...item,
-          categories: [...item.categories, category]
+          categories: [category, ...item.categories]
         };
       }
       return item;

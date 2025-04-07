@@ -55,7 +55,7 @@ function NewCategoryModal({ handleClose, categoryValue }) {
 
         const categoryExists = categoriesToSelect.includes(categoryName);
 
-        if (categoryExists) {
+        if (categoriesToSelect.length && categoryExists) {
             toast.error('Categoria já existe! Escolha outro nome.');
             return;
         }
@@ -66,14 +66,15 @@ function NewCategoryModal({ handleClose, categoryValue }) {
             await addCategory(categoryName);
         }
 
-        handleClose();
+        toast.success(`Categoria ${categoryValue ? 'atualizada' : 'criada'} com sucesso!`);
+        handleClose(categoryName);
     }, [categoryName, categoryValue, addCategory]);
 
   return (
     <Modal>
         <Container>
             <Typography variant="h4" style={{ fontWeight: '300', fontSize: 24, marginBottom: 16 }}>
-                Adicionar Categoria
+                {categoryValue ? 'Editar' : 'Adicionar'} Categoria
             </Typography>
 
             <TextField 
@@ -109,7 +110,7 @@ function NewCategoryModal({ handleClose, categoryValue }) {
                     size="large"
                     onClick={handleSave}
                 >
-                    Salvar
+                    {categoryValue ? 'Salvar' : 'Criar'}
                 </Button>
             </FlexContainer>
         </Container>
