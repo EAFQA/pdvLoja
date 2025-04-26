@@ -66,9 +66,15 @@ function NewCategoryModal({ handleClose, categoryValue }) {
             await addCategory(categoryName);
         }
 
-        toast.success(`Categoria ${categoryValue ? 'atualizada' : 'criada'} com sucesso!`);
-        handleClose(categoryName);
-    }, [categoryName, categoryValue, addCategory]);
+        try {
+            toast.success(`Categoria ${categoryValue ? 'atualizada' : 'criada'} com sucesso!`);
+            handleClose(categoryName);
+        } catch (err) {
+            console.error(err);
+            handleClose();
+        }
+
+    }, [categoryName, handleClose, categoryValue, addCategory]);
 
   return (
     <Modal>

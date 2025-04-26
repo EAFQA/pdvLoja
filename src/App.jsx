@@ -11,6 +11,7 @@ import { ActionsProvider } from "./contexts/actions";
 import { ProductProvider } from "./contexts/product";
 import Stock from "./sections/stock";
 import Categories from "./sections/categories";
+import Reports from "./sections/reports";
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState('cart');
@@ -47,6 +48,10 @@ function App() {
 
               {
                 currentRoute === 'category' && <Categories />
+              }
+
+{
+                currentRoute === 'reports' && <Reports />
               }
             </div>
           </ProductProvider>

@@ -56,8 +56,6 @@ const ProductHistoryText = styled.p`
 function ProductHistoryModal({ product, handleClose }) {
     const { actions } = useActions();
 
-    console.log(actions);
-
     const logs = useMemo(() => {
         const filteredLogs = actions.filter(action => action.products.find(p => p.id === product.id));
         return filteredLogs.map(log => {

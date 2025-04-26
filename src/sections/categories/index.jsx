@@ -32,7 +32,6 @@ const SearchContainer = styled.div`
     padding: 16px;
     border-bottom: 1px solid #D8D8D6;
     width: 100%;
-    justify-content: space-between;
     align-items: center;
     min-height: 56px;
 `;
@@ -63,7 +62,7 @@ function Categories () {
                 <ProductsContainer>
                     <SearchContainer>
                         <TextField 
-                            style={{ width: '50%' }} 
+                            style={{ width: '50%', marginRight: 16 }} 
                             value={searchName} 
                             onChange={(e) => setSearchName(e.target.value)}
                             id="search-by-name" 

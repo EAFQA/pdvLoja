@@ -3,6 +3,7 @@ import { ImCart } from "react-icons/im";
 import { useCallback, useMemo } from 'react';
 import { MdAddBusiness } from "react-icons/md";
 import { MdCategory } from "react-icons/md";
+import { GiMoneyStack } from "react-icons/gi";
 
 const Container = styled.div`
     display: flex;
@@ -49,6 +50,12 @@ function Menu({ handleRouteChange, currentRoute }) {
         color: getSectionColor('category'),
     }), [currentRoute, getSectionColor]);
 
+    const reportsStyle = useMemo(() => ({
+        height: 40,
+        width: 40,
+        color: getSectionColor('reports'),
+    }), [currentRoute, getSectionColor]);
+
   return (
     <Container>
         <MenuItem onClick={() => handleRouteChange('cart')}>
@@ -62,6 +69,10 @@ function Menu({ handleRouteChange, currentRoute }) {
         <MenuItem onClick={() => handleRouteChange('category')}>
             <MdCategory style={categoryManagementStyle}/>
             <p style={{ color: categoryManagementStyle.color, margin: 0 }}>Categorias</p>
+        </MenuItem>
+        <MenuItem onClick={() => handleRouteChange('reports')}>
+            <GiMoneyStack style={reportsStyle}/>
+            <p style={{ color: reportsStyle.color, margin: 0 }}>Relatórios</p>
         </MenuItem>
     </Container>
   );
