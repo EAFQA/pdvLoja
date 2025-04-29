@@ -12,7 +12,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { DatePicker } from './styles';
-import { DateRangePicker } from 'rsuite';
 import DateTimeFormats from './locale';
 
 const PageContainer = styled.div`
@@ -154,12 +153,23 @@ function Reports () {
                 soldItems: data.quantity,
                 quantity: `${quantity} ${unity}${data.quantity >= 2 ? 's' : ''}`,
                 total: `R$${data.total.toFixed(2).replace('.', ',')}`,
+                totalValue: Number(data.total.toFixed(2)),
                 productValue: `R$${data.productValue.toFixed(2).replace('.', ',')}`,
                 category: curr?.category?.label ?? curr.category,
                 name: curr.name
             }
         }).filter(item => item.soldItems);
     }, [categories, productsToSearch, selectionRange]);
+
+    const totalReports = useMemo(() => {
+        if (!reports.length) return null;
+
+        const result = reports.reduce((acc, item) => {
+            return item.totalValue + acc;
+        }, 0);
+
+        return `R$${result.toFixed(2).replace('.', ',')}`;
+    }, [reports]);
 
     return (
         <PageContainer>
@@ -258,6 +268,22 @@ function Reports () {
                                             </TableRow>
                                         )
                                     })}
+                                    {
+                                        Boolean(totalReports) && (
+                                            <TableRow
+                                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                            >
+                                                {tableKeys.map((prop, index) => {
+                                                    return (
+                                                        <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ fontWeight: 'bold'  }}>
+                                                            {index === 0 && "Total"}
+                                                            {index === tableKeys.length - 1 && totalReports}
+                                                        </TableCell>
+                                                    );
+                                                })}
+                                            </TableRow>
+                                        )
+                                    }
                                 </TableBody>
                             </Table>
                         </TableContainer>
