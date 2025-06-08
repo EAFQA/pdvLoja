@@ -5,6 +5,7 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+  const [paymentType, setPaymentType] = useState();
   const [warningsShowed, setWarningsShowed] = useState([]);
 
   const checkMinStock = useCallback((product, quantityOnCart) => {
@@ -102,7 +103,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const buyCart = () => {
-    if (!cart.length) return;
+    if (!cart.length || !paymentType) return;
     const newSale = {
       products: cart.map(item => ({
         id: item.id,
@@ -111,6 +112,7 @@ export const CartProvider = ({ children }) => {
         price: item.price
       })),
       type: 'sale',
+      paymentType: paymentType?.value || '',
       date: new Date().toISOString()
     };
 
@@ -164,6 +166,9 @@ export const CartProvider = ({ children }) => {
     setCart(newCart);
   }
 
+  const changePaymentType = (paymentType) => {
+    setPaymentType(paymentType);
+  }
 
   return (
     <CartContext.Provider 
@@ -175,7 +180,9 @@ export const CartProvider = ({ children }) => {
         buyCart, 
         clearCart, 
         updateCartByStockAction, 
-        updateCartByUpdate 
+        updateCartByUpdate,
+        changePaymentType,
+        paymentType
       }}
     >
       {children}

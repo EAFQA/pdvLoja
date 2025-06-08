@@ -93,7 +93,16 @@ export const ActionsProvider = ({ children }) => {
   }, [actions, editingActionProducts, clearEditingActionProducts, saveData]);
   
   return ( 
-    <ActionsContext.Provider value={{ completeUpdate, actions, logAction, editingActionProducts, setEditingActionProducts, addItemsToAction, removeItemFromAction, clearEditingActionProducts  }}>
+    <ActionsContext.Provider value={{ 
+      completeUpdate, 
+      actions, 
+      logAction, 
+      editingActionProducts, 
+      setEditingActionProducts, 
+      addItemsToAction, 
+      removeItemFromAction, 
+      clearEditingActionProducts
+    }}>
       {children}
     </ActionsContext.Provider>
   );

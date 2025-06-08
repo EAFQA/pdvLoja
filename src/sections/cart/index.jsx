@@ -1,16 +1,11 @@
 import styled from 'styled-components';
-import { ImCart } from "react-icons/im";
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { MdAddBusiness, MdAddCircleOutline, MdCreate } from "react-icons/md";
+import { useMemo, useRef, useState } from 'react';
 import TextField from '@mui/material/TextField';
-import { Autocomplete, FormControl, IconButton, InputLabel, MenuItem, Select, Tooltip, Typography } from '@mui/material';
-import { IoAddCircleSharp } from "react-icons/io5";
+import { Autocomplete, IconButton, Tooltip, Typography } from '@mui/material';
 import ProductModal from '../../components/product-modal';
 import { useProduct } from '../../contexts/product';
 import ProductList from '../../components/product-list';
 import CartList from '../../components/invoice-list';
-import { AiFillProduct } from "react-icons/ai";
-import { CgGift } from "react-icons/cg";
 import { BsBoxes } from "react-icons/bs";
 
 const PageContainer = styled.div`
@@ -20,7 +15,6 @@ const PageContainer = styled.div`
     padding: 0 16px;
     width: calc(100vw - 144px);
 `;
-
 
 const ProductsContainer = styled.div`
     display: flex;
@@ -77,7 +71,7 @@ function Cart () {
 
         const orderBy = (prds) => {
             return prds.sort((prd1, prd2) => {
-                if (order.label === 'Por maior preço') {
+                if (order?.label === 'Por maior preço') {
                     return prd2.price - prd1.price;
                 }
                 

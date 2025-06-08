@@ -13,6 +13,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { DatePicker } from './styles';
 import DateTimeFormats from './locale';
+import { PaymentTypes } from '../../utils';
 
 const PageContainer = styled.div`
     display: flex;
@@ -95,6 +96,7 @@ function Reports () {
     const { actions } = useActions();
     const [categories, setCategories] = useState([]);
     const [productsToSearch, setProductsToSearch] = useState([]);
+    const [paymentType, setPaymentType] = useState();
     
     const [selectionRange, setSelectionRange] = useState(getDefaultDate());
 
@@ -106,7 +108,9 @@ function Reports () {
     }, [products]);
 
     const reports = useMemo(() => {
-        const filteredSales = actions.filter(log => log.type === 'sale');
+        const filteredSales = paymentType ? 
+            actions.filter(log => log.type === 'sale' && log.paymentType === paymentType?.value) : 
+            actions.filter(log => log.type === 'sale');
         const sales = selectionRange?.length ? filteredSales.filter(item => {
             const date = new Date(item.date).getTime();
             return (selectionRange[0].getTime() <= date && date <= selectionRange[1].getTime())
@@ -159,7 +163,7 @@ function Reports () {
                 name: curr.name
             }
         }).filter(item => item.soldItems);
-    }, [categories, productsToSearch, selectionRange]);
+    }, [categories, productsToSearch, paymentType, selectionRange]);
 
     const totalReports = useMemo(() => {
         if (!reports.length) return null;
@@ -214,7 +218,7 @@ function Reports () {
                             setProductsToSearch(newValue);
                         }}
                         sx={{ 
-                            width: '30%',
+                            width: '25%',
                             maxHeight: 56
                         }}
                         renderInput={(params) => <TextField {...params} label="Produtos" />}
@@ -230,10 +234,24 @@ function Reports () {
                             setCategories(newValue);
                         }}
                         sx={{
-                            width: '30%',
+                            width: '20%',
                             maxHeight: 56
                         }}
                         renderInput={(params) => <TextField {...params} label="Categorias" />}
+                    />
+
+                    <Autocomplete
+                        disablePortal
+                        options={PaymentTypes}
+                        value={paymentType}
+                        onChange={(_event, selected) => {
+                            setPaymentType(selected);
+                        }}
+                        sx={{
+                            width: '15%',
+                            maxHeight: 56
+                        }}
+                        renderInput={(params) => <TextField {...params} label="Forma de Pagamento" />}
                     />
                 </SearchContainer>
                 <div style={{ width: '100%', height: '100%', overflowY: 'auto', padding: 16 }}>

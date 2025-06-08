@@ -1,12 +1,13 @@
 import styled from 'styled-components';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { MdCheck, MdDelete, MdEdit } from "react-icons/md";
-import { Button, IconButton, TextField } from '@mui/material';
+import { Autocomplete, Button, IconButton, TextField } from '@mui/material';
 import { useCart } from '../../contexts/cart';
 import { useActions } from '../../contexts/actions';
 import { useProduct } from '../../contexts/product';
 import { toast } from 'react-toastify';
 import ConfirmModal from '../confirm-modal';
+import { PaymentTypes } from '../../utils';
 
 export const ProductContainer = styled.div`
   margin-top: 16px;
@@ -29,7 +30,7 @@ export const ProductItem = styled.div`
 `;
 
 function CartList() {
-  const { cart, updateQuantityOnCart, removeFromCart, clearCart, buyCart } = useCart();
+  const { cart, updateQuantityOnCart, removeFromCart, clearCart, buyCart, changePaymentType, paymentType } = useCart();
   const { logAction } = useActions();
   const { updateStock } = useProduct();
   const [editingProduct, setEditingProduct] = useState(null);
@@ -144,7 +145,24 @@ function CartList() {
         </div>
       </div>
       <div style={{ marginTop: 'auto', textAlign: 'end', fontSize: 22, fontWeight: 'bold' }}>
-        <p>Total: R${total}</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+              <Autocomplete
+                disablePortal
+                options={PaymentTypes}
+                value={paymentType || ''}
+                onChange={(_event, selected) => {
+                    changePaymentType(selected || '');
+                }}
+                sx={{
+                    width: 200,
+                    maxHeight: 56
+                }}
+                renderInput={(params) => <TextField {...params} label="Forma de Pagamento" />}
+            />
+          </div>
+          <p>Total: R${total}</p>
+        </div>
         <div style={{ marginTop: '10px', height: 80, display: 'flex', justifyContent: 'space-around' }}>
           <Button 
               variant="contained" 
@@ -161,10 +179,11 @@ function CartList() {
 
           <Button 
               variant="contained" 
-              style={{ marginTop: 16, backgroundColor: cart.length ? '#1DBC60' : '#d3d3d3' }}
+              style={{ marginTop: 16, backgroundColor: (cart.length && paymentType) ? '#1DBC60' : '#d3d3d3' }}
               size="large"
               onClick={() => {
-                if (!cart.length) return;
+                if (!cart.length || !paymentType) return;
+
                 const stockAction = cart.map(item => ({
                   id: item.id,
                   incrementQuantity: item.quantity * -1,
