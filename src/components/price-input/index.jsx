@@ -1,6 +1,6 @@
 import { InputAdornment, TextField } from "@mui/material";
 
-function PriceInput ({ onUpdate, priceValue, title, required = false }) {
+function PriceInput ({ onUpdate, priceValue, title, required = false, width = "25%" }) {
   return (
         <TextField 
             id="name" 
@@ -26,7 +26,7 @@ function PriceInput ({ onUpdate, priceValue, title, required = false }) {
                 }
             }}
             sx={{
-                width: '25%'
+                width
             }}
             required={required}
             type='number'

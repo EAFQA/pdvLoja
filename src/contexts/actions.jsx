@@ -91,6 +91,64 @@ export const ActionsProvider = ({ children }) => {
     saveData(newActions);
     clearEditingActionProducts();
   }, [actions, editingActionProducts, clearEditingActionProducts, saveData]);
+
+  const saveCashStock = useCallback((value) => {
+    const currentDate = new Date();
+    
+    const newValue = {
+      date: currentDate.toISOString(),
+      type: 'cash-stock',
+      products: [],
+      initialValue: value
+    };
+
+    const cashIndex = actions.findIndex(action => {
+      if (action.type !== 'cash-stock') return;
+
+      const dateOfAction = new Date(action.date);
+
+      const dates = [
+        dateOfAction,
+        currentDate
+      ].map(item => `${item.getDate()}-${item.getMonth()}-${item.getFullYear()}`)
+
+      console.log(dates);
+
+      return (
+        dates[1] === dates[0]
+      );
+    });
+
+    console.log(cashIndex);
+
+    const newActions = cashIndex !== -1 
+      ? actions.map((item, index) => index === cashIndex ? newValue : item)
+      : [newValue, ...actions];
+
+    setActions(newActions);
+    saveData(newActions);
+  }, [actions, saveData]);
+
+  const getCurrentInitialValue = useCallback(() => {
+    const currentDate = new Date();
+    
+    return actions.find(action => {
+      if (action.type !== 'cash-stock') return;
+
+      const dateOfAction = new Date(action.date);
+
+
+      return (
+        dateOfAction.getFullYear() === currentDate.getFullYear() &&
+        dateOfAction.getMonth() === currentDate.getMonth() &&
+        dateOfAction.getDate() === currentDate.getDate()
+      );
+    })?.initialValue ?? 0;
+  }, [actions]);
+
+  const getAllStockInitialValues = useCallback(() => (
+    actions.filter(item => item.type === 'cash-stock')
+  ), [actions]);
   
   return ( 
     <ActionsContext.Provider value={{ 
@@ -101,7 +159,10 @@ export const ActionsProvider = ({ children }) => {
       setEditingActionProducts, 
       addItemsToAction, 
       removeItemFromAction, 
-      clearEditingActionProducts
+      clearEditingActionProducts,
+      saveCashStock,
+      getCurrentInitialValue,
+      getAllStockInitialValues
     }}>
       {children}
     </ActionsContext.Provider>

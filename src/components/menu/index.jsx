@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react';
 import { MdAddBusiness } from "react-icons/md";
 import { MdCategory } from "react-icons/md";
 import { GiMoneyStack } from "react-icons/gi";
+import { PiCashRegister } from "react-icons/pi";
 
 const Container = styled.div`
     display: flex;
@@ -56,6 +57,12 @@ function Menu({ handleRouteChange, currentRoute }) {
         color: getSectionColor('reports'),
     }), [currentRoute, getSectionColor]);
 
+    const cashierStyle = useMemo(() => ({
+        height: 40,
+        width: 40,
+        color: getSectionColor('cashier'),
+    }), [currentRoute, getSectionColor]);
+
   return (
     <Container>
         <MenuItem onClick={() => handleRouteChange('cart')}>
@@ -73,6 +80,10 @@ function Menu({ handleRouteChange, currentRoute }) {
         <MenuItem onClick={() => handleRouteChange('reports')}>
             <GiMoneyStack style={reportsStyle}/>
             <p style={{ color: reportsStyle.color, margin: 0 }}>Relatórios</p>
+        </MenuItem>
+        <MenuItem onClick={() => handleRouteChange('cashier')}>
+            <PiCashRegister style={cashierStyle}/>
+            <p style={{ color: cashierStyle.color, margin: 0 }}>Caixa</p>
         </MenuItem>
     </Container>
   );

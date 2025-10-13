@@ -12,6 +12,7 @@ import { ProductProvider } from "./contexts/product";
 import Stock from "./sections/stock";
 import Categories from "./sections/categories";
 import Reports from "./sections/reports";
+import Cashier from "./sections/cashier";
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState('cart');
@@ -50,8 +51,12 @@ function App() {
                 currentRoute === 'category' && <Categories />
               }
 
-{
+              {
                 currentRoute === 'reports' && <Reports />
+              }
+
+              {
+                currentRoute === 'cashier' && <Cashier />
               }
             </div>
           </ProductProvider>
