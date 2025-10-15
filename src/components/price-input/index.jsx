@@ -1,10 +1,11 @@
 import { InputAdornment, TextField } from "@mui/material";
 
-function PriceInput ({ onUpdate, priceValue, title, required = false, width = "25%" }) {
+function PriceInput ({ onUpdate, priceValue, title, required = false, width = "25%", disabled = false }) {
   return (
         <TextField 
             id="name" 
             label={title}
+            disabled={disabled}
             variant="outlined" 
             value={priceValue}
             slotProps={{

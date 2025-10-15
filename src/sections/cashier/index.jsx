@@ -13,6 +13,7 @@ import DateTimeFormats from './locale';
 import PriceInput from '../../components/price-input';
 import { isNumber } from 'radash';
 import { Button } from '@mui/material';
+import { FormatCash } from '../../utils';
 
 const PageContainer = styled.div`
     display: flex;
@@ -74,12 +75,19 @@ const tableKeys = [
 function Cashier () {
     const { actions, getCurrentInitialValue, saveCashStock, getAllStockInitialValues } = useActions();
 
-    const [initialValue, setInitialValue] = useState(getCurrentInitialValue());
+    const [initialValue, setInitialValue] = useState(0);
+    const [isValueLocked, setValueLocked] = useState(false);
     
     const [selectionRange, setSelectionRange] = useState();
 
     useEffect(() => {
-        setInitialValue(getCurrentInitialValue());
+        const [
+            newInitialValue,
+            newIsLocked
+        ] = getCurrentInitialValue();
+
+        setInitialValue(newInitialValue);
+        setValueLocked(newIsLocked);
     }, [getCurrentInitialValue]);
 
     const reports = useMemo(() => {
@@ -98,7 +106,7 @@ function Cashier () {
 
                 return ({
                     ...item,
-                    date: `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`
+                    date: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
                 });
             })
             .reduce((acc, curItem) => {
@@ -110,29 +118,46 @@ function Cashier () {
                 }
             }, {});
 
+        const currentDate = new Date();
+        const currentDateStr = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`
+
+        if (typeof groupedSales[currentDateStr] !== 'number') {
+            groupedSales[currentDateStr] = 0;
+        }
+
         const cashStock = getAllStockInitialValues().map(item => {
             const date = new Date(item.date);
             
             return {
                 value: item.initialValue,
-                date: `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`
+                date: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
             };
         });
 
+        if (!cashStock.some(item => item.date === currentDateStr)) {
+            cashStock.unshift({
+                date: currentDateStr,
+                value: initialValue
+            });
+        }
+
         return Object.entries(groupedSales).map(([date, sales]) => {
             const initialValue = cashStock.find(item => item.date === date)?.value ?? 0;
+
+            const finalValue = sales - initialValue;
 
             return {
                 date: date
                     .split('/')
                     .map(item => item.length == 1 ? `0${item}`: item)
                     .join('/'),
-                sales: (sales).toFixed(2).replace('.', ','),
-                initialValue: (initialValue).toFixed(2).replace('.', ','),
-                finalValue: (initialValue + sales).toFixed(2).replace('.', ',')
+                sales: FormatCash(sales),
+                initialValue: FormatCash(initialValue),
+                finalValue: FormatCash(sales - initialValue),
+                color: finalValue < 0 ? 'red' : 'black'
             };
         }).filter(item => item.date);
-    }, [selectionRange, actions]);
+    }, [selectionRange, actions, initialValue, getCurrentInitialValue, getAllStockInitialValues]);
 
     return (
         <PageContainer>
@@ -175,6 +200,7 @@ function Cashier () {
                                 onUpdate={(value) => {
                                     setInitialValue(value);
                                 }}
+                                disabled={isValueLocked}
                                 required
                                 width="160px"
                             />
@@ -188,6 +214,7 @@ function Cashier () {
                                         if (isNumber(value || 0) && !Number.isNaN(value))
                                             saveCashStock(value || 0);
                                     }}
+                                    disabled={isValueLocked}
                                     style={{ marginTop: -16 }}
                                 >
                                     Atualizar caixa diário
@@ -221,7 +248,10 @@ function Cashier () {
                                             >
                                                 {tableKeys.map(prop => {
                                                     return (
-                                                        <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ fontWeight: prop.bold ? 'bold' : ''  }}>
+                                                        <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ 
+                                                            fontWeight: prop.bold ? 'bold' : '',  
+                                                            color: prop.key === 'finalValue' ? item.color : 'black'   
+                                                        }}>
                                                             {item[prop.key] || prop.defaultValue}
                                                         </TableCell>
                                                     );

@@ -69,6 +69,13 @@ const tableKeys = [
         align: 'right'
     },
     {
+        title: 'Formas de pagamento',
+        key: 'paymentTypes',
+        bold: false,
+        defaultValue: '-',
+        align: 'left'
+    },
+    {
         title: 'Total',
         key: 'total',
         bold: true,
@@ -143,6 +150,7 @@ function Reports () {
                         return salesAcc + sale.quantity
                     }, 0),
                 productValue: curr.price || 0,
+                paymentTypes: productSales.map(item => item.paymentType).sort(),
                 total: allSales
                     .reduce((salesAcc, sale) => {
                         return salesAcc + sale.quantity * sale.price; 
@@ -158,6 +166,7 @@ function Reports () {
                 quantity: `${quantity} ${unity}${data.quantity >= 2 ? 's' : ''}`,
                 total: `R$${data.total.toFixed(2).replace('.', ',')}`,
                 totalValue: Number(data.total.toFixed(2)),
+                paymentTypes: [ ...new Set(data.paymentTypes.filter(Boolean)) ].join(', '),
                 productValue: `R$${data.productValue.toFixed(2).replace('.', ',')}`,
                 category: curr?.category?.label ?? curr.category,
                 name: curr.name

@@ -10,3 +10,15 @@ export const PaymentTypes = [
     { label: 'Pix', value: 'pix' },
     { label: 'Dinheiro', value: 'dinheiro' }
 ];
+
+export const FixNumber = (value) => {
+  return value.toFixed(2).replace('.', ',');
+}
+
+export const FormatCash = (value) => {
+  if (value < 0) {
+    return "-R$" + FixNumber(value * -1);
+  }
+
+  return "R$" + FixNumber(value);
+}

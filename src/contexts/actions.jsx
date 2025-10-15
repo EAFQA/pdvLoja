@@ -23,6 +23,20 @@ export const ActionsProvider = ({ children }) => {
   // Function to log an action
   const logAction = (action) => {
     const newActions = [action, ...actions];
+
+    if (action.type === 'sale' && action.paymentType === 'dinheiro') {
+      const [currentCashStock, isLocked] = getCurrentInitialValue();
+
+      if (!isLocked) {
+        newActions.unshift({
+          date: new Date().toISOString(),
+          type: 'cash-stock',
+          products: [],
+          initialValue: currentCashStock
+        });
+      }
+    }
+
     setActions(newActions);
     saveData(newActions);
   };
@@ -112,14 +126,10 @@ export const ActionsProvider = ({ children }) => {
         currentDate
       ].map(item => `${item.getDate()}-${item.getMonth()}-${item.getFullYear()}`)
 
-      console.log(dates);
-
       return (
         dates[1] === dates[0]
       );
     });
-
-    console.log(cashIndex);
 
     const newActions = cashIndex !== -1 
       ? actions.map((item, index) => index === cashIndex ? newValue : item)
@@ -132,18 +142,31 @@ export const ActionsProvider = ({ children }) => {
   const getCurrentInitialValue = useCallback(() => {
     const currentDate = new Date();
     
-    return actions.find(action => {
+    const dailyValue = actions.find(action => {
       if (action.type !== 'cash-stock') return;
 
       const dateOfAction = new Date(action.date);
-
 
       return (
         dateOfAction.getFullYear() === currentDate.getFullYear() &&
         dateOfAction.getMonth() === currentDate.getMonth() &&
         dateOfAction.getDate() === currentDate.getDate()
       );
-    })?.initialValue ?? 0;
+    });
+
+    if (!dailyValue) {
+      const firstStock = actions.find(item => item.type === 'cash-stock');
+      
+      return [
+        firstStock?.initialValue || 0,
+        false
+      ]
+    }
+
+    return [
+      dailyValue?.initialValue || 0,
+      true
+    ];
   }, [actions]);
 
   const getAllStockInitialValues = useCallback(() => (
