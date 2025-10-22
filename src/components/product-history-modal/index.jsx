@@ -11,6 +11,7 @@ import { useActions } from '../../contexts/actions';
 const Container = styled.div`
     display: flex;
     padding: 16px;
+    max-height: 80vh;
     flex-direction: column;
     align-content: space-between;
     align-items: center;
@@ -43,6 +44,8 @@ const FlexContainer = styled.div`
 const ProductHistoryList = styled.div`
     width: 100%;
     background-color: #FFFFFF;
+    max-height: 100%;
+    overflow-y: auto;
     border: 2px solid black;
 `;
 
@@ -81,7 +84,8 @@ function ProductHistoryModal({ product, handleClose }) {
             if (log.type === 'sale')
             {
                 const total = productLog.quantity * product.price;
-                return `${dateString}Venda de ${productLog.quantity} ${unity}${isPlural ? 's' : ''} por R$${total.toFixed(2).replace('.', ',')}`;
+
+                return `${dateString}Venda de ${productLog.quantity} ${unity}${isPlural ? 's' : ''} por R$${total.toFixed(2).replace('.', ',')}. ${log.paymentType ? "Forma de pagamento: " + log.paymentType : ""}`;
             }
 
             if (log.type === 'stock')

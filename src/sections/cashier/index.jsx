@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useActions } from '../../contexts/actions';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -11,9 +11,10 @@ import Paper from '@mui/material/Paper';
 import { CashStockSC, DatePicker } from './styles';
 import DateTimeFormats from './locale';
 import PriceInput from '../../components/price-input';
-import { isNumber } from 'radash';
+import { group, isNumber } from 'radash';
 import { Button } from '@mui/material';
 import { FormatCash } from '../../utils';
+import { GiConfirmed } from "react-icons/gi";
 
 const PageContainer = styled.div`
     display: flex;
@@ -73,7 +74,9 @@ const tableKeys = [
 ];
 
 function Cashier () {
-    const { actions, getCurrentInitialValue, saveCashStock, getAllStockInitialValues } = useActions();
+    const { actions, getCurrentInitialValue, saveCashStock, getAllStockInitialValues, updateRetiredValue } = useActions();
+
+    const [currentStockRetire, setCurrentStockRetire] = useState(0);
 
     const [initialValue, setInitialValue] = useState(0);
     const [isValueLocked, setValueLocked] = useState(false);
@@ -99,7 +102,7 @@ function Cashier () {
             return (selectionRange[0].getTime() <= date && date <= selectionRange[1].getTime())
         }) : filteredSales;
 
-        const groupedSales = sales
+        let groupedSales = sales
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .map(item => {
                 const date = new Date(item.date);
@@ -130,7 +133,8 @@ function Cashier () {
             
             return {
                 value: item.initialValue,
-                date: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+                date: `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`,
+                retiredValue: item.retiredValue
             };
         });
 
@@ -141,10 +145,23 @@ function Cashier () {
             });
         }
 
-        return Object.entries(groupedSales).map(([date, sales]) => {
-            const initialValue = cashStock.find(item => item.date === date)?.value ?? 0;
+        const values = Object.entries(groupedSales)
+            .sort((a, b) => {
+                const [aDateStr] = a;
+                const [bDateStr] = b;
+                const aDateParts = aDateStr.split('/').map(part => Number(part));
+                const bDateParts = bDateStr.split('/').map(part => Number(part));
+                const aDate = new Date(aDateParts[2], aDateParts[1] - 1, aDateParts[0]);
+                const bDate = new Date(bDateParts[2], bDateParts[1] - 1, bDateParts[0]);
+                return bDate - aDate;
+            })
+            .map(([date, sales]) => {
+            const curCashStock = cashStock.find(item => item.date === date);
+            const initialValue = curCashStock?.value ?? 0;
 
-            const finalValue = sales - initialValue;
+            const finalValue = (typeof curCashStock?.retiredValue !== 'number') ? sales - initialValue : curCashStock?.retiredValue;
+
+            const retireLimit = finalValue <= 0 ? 0 : finalValue;
 
             return {
                 date: date
@@ -152,11 +169,22 @@ function Cashier () {
                     .map(item => item.length == 1 ? `0${item}`: item)
                     .join('/'),
                 sales: FormatCash(sales),
+                salesInput: sales,
+                isRetireCompleted: Boolean(typeof curCashStock?.retiredValue === 'number'),
                 initialValue: FormatCash(initialValue),
-                finalValue: FormatCash(sales - initialValue),
-                color: finalValue < 0 ? 'red' : 'black'
+                initialValueInput: initialValue,
+                finalValue: FormatCash(retireLimit),
+                finalValueInput: (retireLimit).toFixed(2),
+                color: 'black'
             };
         }).filter(item => item.date);
+
+        if (values[0])
+        {
+            setCurrentStockRetire(values[0].finalValueInput);
+        }
+
+        return values;
     }, [selectionRange, actions, initialValue, getCurrentInitialValue, getAllStockInitialValues]);
 
     return (
@@ -240,13 +268,60 @@ function Cashier () {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {reports.map(item => {
+                                    {reports.map((item, repoIndex) => {
                                         return (
                                             <TableRow
                                                 key={item.id}
                                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                             >
-                                                {tableKeys.map(prop => {
+                                                {tableKeys.map((prop, index) => {
+                                                    if (repoIndex === 0 && index === tableKeys.length - 1 && !item.isRetireCompleted)
+                                                    {
+                                                        return (
+                                                            <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ 
+                                                                fontWeight: prop.bold ? 'bold' : '',  
+                                                                color: prop.key === 'finalValue' ? item.color : 'black',
+                                                                display: 'flex', 
+                                                                alignItems: 'center'  
+                                                            }}>
+                                                                <div style={{ marginLeft: 16 }}
+                                                                    onClick={() => {
+                                                                        if (item.finalValueInput <= 0 || currentStockRetire > item.finalValueInput) return;
+
+                                                                        const value = Number(currentStockRetire);
+                                                                        if (isNumber(value || 0) && !Number.isNaN(value))
+                                                                            updateRetiredValue(value || 0, item.salesInput, item.initialValueInput);
+                                                                    }}
+                                                                >
+                                                                    <GiConfirmed fontSize={24} />
+                                                                </div>
+                                                                
+                                                                <PriceInput 
+                                                                    title="" 
+                                                                    priceValue={currentStockRetire}
+                                                                    onUpdate={(value) => {
+                                                                        setCurrentStockRetire(value);
+                                                                    }}
+                                                                    disabled={item.finalValueInput <= 0}
+                                                                    required
+                                                                    width="160px"
+                                                                />
+                                                            </TableCell>
+                                                        );
+                                                    }
+
+                                                    if (repoIndex !== 0 && index === tableKeys.length - 1 && !item.isRetireCompleted)
+                                                    {
+                                                        return (
+                                                            <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ 
+                                                                fontWeight: prop.bold ? 'bold' : '',  
+                                                                color: prop.key === 'finalValue' ? item.color : 'black'   
+                                                            }}>
+                                                                -
+                                                            </TableCell>
+                                                        )
+                                                    }
+
                                                     return (
                                                         <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ 
                                                             fontWeight: prop.bold ? 'bold' : '',  

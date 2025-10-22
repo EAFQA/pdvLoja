@@ -139,6 +139,52 @@ export const ActionsProvider = ({ children }) => {
     saveData(newActions);
   }, [actions, saveData]);
 
+  const updateRetiredValue = useCallback((retiredValue, salesValue, initialValue) => {
+    const currentDate = new Date();
+    
+    const newValue = {
+      date: currentDate.toISOString(),
+      type: 'cash-stock',
+      products: [],
+      initialValue,
+      retiredValue
+    };
+
+    const cashIndex = actions.findIndex(action => {
+      if (action.type !== 'cash-stock') return;
+
+      const dateOfAction = new Date(action.date);
+
+      const dates = [
+        dateOfAction,
+        currentDate
+      ].map(item => `${item.getDate()}-${item.getMonth()}-${item.getFullYear()}`)
+
+      return (
+        dates[1] === dates[0]
+      );
+    });
+
+    const newActions = cashIndex !== -1 
+      ? actions.map((item, index) => index === cashIndex ? newValue : item)
+      : [newValue, ...actions];
+    
+    const nextDay = new Date(currentDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+
+    const nextDayValue = {
+      date: nextDay.toISOString(),
+      type: 'cash-stock',
+      products: [],
+      initialValue: Number((salesValue - retiredValue).toFixed(2))
+    };
+
+    newActions.unshift(nextDayValue);
+
+    setActions(newActions);
+    saveData(newActions);
+  }, [actions, saveData]);
+
   const getCurrentInitialValue = useCallback(() => {
     const currentDate = new Date();
     
@@ -185,7 +231,8 @@ export const ActionsProvider = ({ children }) => {
       clearEditingActionProducts,
       saveCashStock,
       getCurrentInitialValue,
-      getAllStockInitialValues
+      getAllStockInitialValues,
+      updateRetiredValue
     }}>
       {children}
     </ActionsContext.Provider>
