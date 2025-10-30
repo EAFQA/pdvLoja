@@ -15,6 +15,7 @@ import { group, isNumber } from 'radash';
 import { Button } from '@mui/material';
 import { FormatCash } from '../../utils';
 import { GiConfirmed } from "react-icons/gi";
+import ConfirmModal from '../../components/confirm-modal';
 
 const PageContainer = styled.div`
     display: flex;
@@ -79,6 +80,7 @@ function Cashier () {
     const [currentStockRetire, setCurrentStockRetire] = useState(0);
 
     const [initialValue, setInitialValue] = useState(0);
+    const [isShowingWithdrawModal, setIsShowingWithdrawModal] = useState(false);
     const [isValueLocked, setValueLocked] = useState(false);
     
     const [selectionRange, setSelectionRange] = useState();
@@ -159,7 +161,7 @@ function Cashier () {
             const curCashStock = cashStock.find(item => item.date === date);
             const initialValue = curCashStock?.value ?? 0;
 
-            const finalValue = (typeof curCashStock?.retiredValue !== 'number') ? sales - initialValue : curCashStock?.retiredValue;
+            const finalValue = (typeof curCashStock?.retiredValue !== 'number') ? sales : curCashStock?.retiredValue;
 
             const retireLimit = finalValue <= 0 ? 0 : finalValue;
 
@@ -188,159 +190,177 @@ function Cashier () {
     }, [selectionRange, actions, initialValue, getCurrentInitialValue, getAllStockInitialValues]);
 
     return (
-        <PageContainer>
-            <ReportContainer>
-                <SearchContainer>
-                    <DatePicker 
-                        size="lg"
-                        label="Período:"
-                        locale={DateTimeFormats}
-                        placeholder="Dia/Mês/Ano ~ Dia/Mês/Ano"
-                        onChange={(newValues) => {
-                            if (!newValues) {
-                                setSelectionRange([]);
-                            }
+        <>
+            <PageContainer>
+                <ReportContainer>
+                    <SearchContainer>
+                        <DatePicker 
+                            size="lg"
+                            label="Período:"
+                            locale={DateTimeFormats}
+                            placeholder="Dia/Mês/Ano ~ Dia/Mês/Ano"
+                            onChange={(newValues) => {
+                                if (!newValues) {
+                                    setSelectionRange([]);
+                                }
 
-                            setSelectionRange(
-                                newValues.map((item, index) => {
-                                    const date = new Date(item);
+                                setSelectionRange(
+                                    newValues.map((item, index) => {
+                                        const date = new Date(item);
 
-                                    if (index === 0) {
-                                        date.setHours(0);
-                                        date.setMinutes(0);
-                                    } else {
-                                        date.setHours(23);
-                                        date.setMinutes(59);
-                                    }
+                                        if (index === 0) {
+                                            date.setHours(0);
+                                            date.setMinutes(0);
+                                        } else {
+                                            date.setHours(23);
+                                            date.setMinutes(59);
+                                        }
 
-                                    return date;
-                                })
-                            )
-                        }}
-                        value={selectionRange}
-                    />
+                                        return date;
+                                    })
+                                )
+                            }}
+                            value={selectionRange}
+                        />
 
-                    <div>
-                        <CashStockSC>
-                            <PriceInput 
-                                title="Fundo de Caixa diário" 
-                                priceValue={initialValue}
-                                onUpdate={(value) => {
-                                    setInitialValue(value);
-                                }}
-                                disabled={isValueLocked}
-                                required
-                                width="160px"
-                            />
-
-                            <div style={{ marginLeft: 16 }}>
-                                <Button 
-                                    variant="contained" 
-                                    size="large"
-                                    onClick={() => {
-                                        const value = Number(initialValue);
-                                        if (isNumber(value || 0) && !Number.isNaN(value))
-                                            saveCashStock(value || 0);
+                        <div>
+                            <CashStockSC>
+                                <PriceInput 
+                                    title="Fundo de Caixa diário" 
+                                    priceValue={initialValue}
+                                    onUpdate={(value) => {
+                                        setInitialValue(value);
                                     }}
                                     disabled={isValueLocked}
-                                    style={{ marginTop: -16 }}
-                                >
-                                    Atualizar caixa diário
-                                </Button>
-                            </div>
-                        </CashStockSC>
-                    </div>
-                </SearchContainer>
+                                    required
+                                    width="160px"
+                                />
 
-                <div style={{ width: '100%', height: '100%', overflowY: 'auto', padding: 16 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', padding: 16 }}>
-                        <TableContainer component={Paper} sx={{ maxWidth: 800 }}>
-                            <Table sx={{ maxWidth: 800 }} aria-label="simple table">
-                                <TableHead>
-                                    <TableRow>
-                                        {
-                                            tableKeys.map(item => (
-                                                <TableCell align={item.align} key={item.key}>
-                                                    {item.title}
-                                                </TableCell>
-                                            ))
-                                        }
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {reports.map((item, repoIndex) => {
-                                        return (
-                                            <TableRow
-                                                key={item.id}
-                                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                            >
-                                                {tableKeys.map((prop, index) => {
-                                                    if (repoIndex === 0 && index === tableKeys.length - 1 && !item.isRetireCompleted)
-                                                    {
-                                                        return (
-                                                            <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ 
-                                                                fontWeight: prop.bold ? 'bold' : '',  
-                                                                color: prop.key === 'finalValue' ? item.color : 'black',
-                                                                display: 'flex', 
-                                                                alignItems: 'center'  
-                                                            }}>
-                                                                <div style={{ marginLeft: 16 }}
-                                                                    onClick={() => {
-                                                                        if (item.finalValueInput <= 0 || currentStockRetire > item.finalValueInput) return;
+                                <div style={{ marginLeft: 16 }}>
+                                    <Button 
+                                        variant="contained" 
+                                        size="large"
+                                        onClick={() => {
+                                            const value = Number(initialValue);
+                                            if (isNumber(value || 0) && !Number.isNaN(value))
+                                                saveCashStock(value || 0);
+                                        }}
+                                        disabled={isValueLocked}
+                                        style={{ marginTop: -16 }}
+                                    >
+                                        Atualizar caixa diário
+                                    </Button>
+                                </div>
+                            </CashStockSC>
+                        </div>
+                    </SearchContainer>
 
-                                                                        const value = Number(currentStockRetire);
-                                                                        if (isNumber(value || 0) && !Number.isNaN(value))
-                                                                            updateRetiredValue(value || 0, item.salesInput, item.initialValueInput);
-                                                                    }}
-                                                                >
-                                                                    <GiConfirmed fontSize={24} />
-                                                                </div>
-                                                                
-                                                                <PriceInput 
-                                                                    title="" 
-                                                                    priceValue={currentStockRetire}
-                                                                    onUpdate={(value) => {
-                                                                        setCurrentStockRetire(value);
-                                                                    }}
-                                                                    disabled={item.finalValueInput <= 0}
-                                                                    required
-                                                                    width="160px"
-                                                                />
-                                                            </TableCell>
-                                                        );
-                                                    }
+                    <div style={{ width: '100%', height: '100%', overflowY: 'auto', padding: 16 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', padding: 16 }}>
+                            <TableContainer component={Paper} sx={{ maxWidth: 800 }}>
+                                <Table sx={{ maxWidth: 800 }} aria-label="simple table">
+                                    <TableHead>
+                                        <TableRow>
+                                            {
+                                                tableKeys.map(item => (
+                                                    <TableCell align={item.align} key={item.key}>
+                                                        {item.title}
+                                                    </TableCell>
+                                                ))
+                                            }
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {reports.map((item, repoIndex) => {
+                                            return (
+                                                <TableRow
+                                                    key={item.id}
+                                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                                >
+                                                    {tableKeys.map((prop, index) => {
+                                                        if (repoIndex === 0 && index === tableKeys.length - 1 && !item.isRetireCompleted)
+                                                        {
+                                                            return (
+                                                                <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ 
+                                                                    fontWeight: prop.bold ? 'bold' : '',  
+                                                                    color: prop.key === 'finalValue' ? item.color : 'black',
+                                                                    display: 'flex', 
+                                                                    alignItems: 'center'  
+                                                                }}>
+                                                                    <div style={{ marginLeft: 16 }}
+                                                                        onClick={() => {
+                                                                            if (item.finalValueInput <= 0 || currentStockRetire > item.finalValueInput) return;
 
-                                                    if (repoIndex !== 0 && index === tableKeys.length - 1 && !item.isRetireCompleted)
-                                                    {
+                                                                            const value = Number(currentStockRetire);
+                                                                            if (isNumber(value || 0) && !Number.isNaN(value)) {
+                                                                                if (value < item.finalValueInput) {
+                                                                                    setIsShowingWithdrawModal(true);
+                                                                                    return;
+                                                                                }
+                                                                                updateRetiredValue(value || 0, item.salesInput, item.initialValueInput);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <GiConfirmed fontSize={24} />
+                                                                    </div>
+                                                                    
+                                                                    <PriceInput 
+                                                                        title="" 
+                                                                        priceValue={currentStockRetire}
+                                                                        onUpdate={(value) => {
+                                                                            setCurrentStockRetire(value);
+                                                                        }}
+                                                                        disabled={item.finalValueInput <= 0}
+                                                                        required
+                                                                        width="160px"
+                                                                    />
+                                                                </TableCell>
+                                                            );
+                                                        }
+
+                                                        if (repoIndex !== 0 && index === tableKeys.length - 1 && !item.isRetireCompleted)
+                                                        {
+                                                            return (
+                                                                <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ 
+                                                                    fontWeight: prop.bold ? 'bold' : '',  
+                                                                    color: prop.key === 'finalValue' ? item.color : 'black'   
+                                                                }}>
+                                                                    -
+                                                                </TableCell>
+                                                            )
+                                                        }
+
                                                         return (
                                                             <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ 
                                                                 fontWeight: prop.bold ? 'bold' : '',  
                                                                 color: prop.key === 'finalValue' ? item.color : 'black'   
                                                             }}>
-                                                                -
+                                                                {item[prop.key] || prop.defaultValue}
                                                             </TableCell>
-                                                        )
-                                                    }
-
-                                                    return (
-                                                        <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ 
-                                                            fontWeight: prop.bold ? 'bold' : '',  
-                                                            color: prop.key === 'finalValue' ? item.color : 'black'   
-                                                        }}>
-                                                            {item[prop.key] || prop.defaultValue}
-                                                        </TableCell>
-                                                    );
-                                                })}
-                                            </TableRow>
-                                        )
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                                                        );
+                                                    })}
+                                                </TableRow>
+                                            )
+                                        })}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </div>
                     </div>
-                </div>
-            </ReportContainer>
-        </PageContainer>
+                </ReportContainer>
+            </PageContainer>
+            {isShowingWithdrawModal && (
+                <ConfirmModal 
+                    title="Confirmar sangria"
+                    text="Ao confirmar a sangria sem o valor total, o restante irá automaticamente para o fundo de caixa. Deseja realmente continuar?"
+                    onConfirm={() => {
+                        updateRetiredValue(Number(currentStockRetire || 0), reports[0].salesInput, reports[0].initialValueInput);
+                        setIsShowingWithdrawModal(false);
+                    }}
+                    handleClose={() => setIsShowingWithdrawModal(false)} 
+                />
+            )}
+        </>
   );
 }
 

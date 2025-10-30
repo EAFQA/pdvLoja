@@ -87,6 +87,13 @@ function Stock () {
                 if (order.label === 'Por maior preço') {
                     return prd2.price - prd1.price;
                 }
+
+                if (order?.label === 'Por ordem alfabética') {
+                    const nameA = prd1.name.toUpperCase();
+                    const nameB = prd2.name.toUpperCase();
+
+                    return nameA.localeCompare(nameB);
+                }
                 
                 return prd1.price - prd2.price;
             });
@@ -117,7 +124,8 @@ function Stock () {
                     disablePortal
                     options={[
                         { label: 'Por maior preço' }, 
-                        { label: 'Por menor preço' }
+                        { label: 'Por menor preço' },
+                        { label: 'Por ordem alfabética' }
                     ]}
                     value={order}
                     onChange={(_event, newValue) => {

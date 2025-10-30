@@ -172,11 +172,13 @@ export const ActionsProvider = ({ children }) => {
     const nextDay = new Date(currentDate);
     nextDay.setDate(nextDay.getDate() + 1);
 
+    const remainingSales = salesValue - retiredValue;
+
     const nextDayValue = {
       date: nextDay.toISOString(),
       type: 'cash-stock',
       products: [],
-      initialValue: Number((salesValue - retiredValue).toFixed(2))
+      initialValue: Number((remainingSales + initialValue).toFixed(2))
     };
 
     newActions.unshift(nextDayValue);

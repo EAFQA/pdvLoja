@@ -196,6 +196,7 @@ function CartList() {
                   updateStock(stockAction);
                   logAction(response);
                   clearCart();
+                  changePaymentType('');
                 }
               }}
           >
