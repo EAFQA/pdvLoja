@@ -83,6 +83,7 @@ function Cashier () {
     const [initialValue, setInitialValue] = useState(0);
     const [isShowingWithdrawModal, setIsShowingWithdrawModal] = useState(false);
     const [isValueLocked, setValueLocked] = useState(false);
+    const [lockedInitialValue, setLockedInitialValue] = useState(0);
     
     const [selectionRange, setSelectionRange] = useState();
 
@@ -92,6 +93,7 @@ function Cashier () {
             newIsLocked
         ] = getCurrentInitialValue();
 
+        setLockedInitialValue(newInitialValue);
         setInitialValue(newInitialValue);
         setValueLocked(newIsLocked);
     }, [getCurrentInitialValue]);
@@ -144,7 +146,7 @@ function Cashier () {
         if (!cashStock.some(item => item.date === currentDateStr)) {
             cashStock.unshift({
                 date: currentDateStr,
-                value: initialValue
+                value: lockedInitialValue
             });
         }
 
@@ -160,7 +162,7 @@ function Cashier () {
             })
             .map(([date, sales]) => {
             const curCashStock = cashStock.find(item => item.date === date);
-            const initialValue = curCashStock?.value ?? 0;
+            const curInitialValue = curCashStock?.value ?? 0;
 
             const finalValue = curCashStock?.retiredValue;
 
@@ -173,9 +175,9 @@ function Cashier () {
                     .join('/'),
                 sales: FormatCash(sales),
                 salesInput: sales,
-                isRetireCompleted: typeof finalValue === 'number' && finalValue === retireLimit,
-                initialValue: FormatCash(initialValue),
-                initialValueInput: initialValue,
+                isRetireCompleted: typeof finalValue === 'number',
+                initialValue: FormatCash(curInitialValue),
+                initialValueInput: curInitialValue,
                 finalValue: typeof finalValue === 'number' ? FormatCash(finalValue) : null,
                 finalValueInput: (retireLimit).toFixed(2),
                 color: 'black',

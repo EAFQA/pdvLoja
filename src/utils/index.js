@@ -12,7 +12,13 @@ export const PaymentTypes = [
 ];
 
 export const FixNumber = (value) => {
-  return value.toFixed(2).replace('.', ',');
+  const valueToUse = (() => {
+    if (typeof value === 'string') return Number(value || 0);
+  
+    return value || 0;
+  })();
+
+  return (valueToUse ?? 0).toFixed(2).replace('.', ',');
 }
 
 export const FormatCash = (value) => {
