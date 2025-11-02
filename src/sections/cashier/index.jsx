@@ -70,7 +70,8 @@ const tableKeys = [
         title: 'Sangria',
         key: 'finalValue',
         bold: true,
-        align: 'right'
+        align: 'right',
+        defaultValue: '-'
     }
 ];
 
@@ -161,9 +162,9 @@ function Cashier () {
             const curCashStock = cashStock.find(item => item.date === date);
             const initialValue = curCashStock?.value ?? 0;
 
-            const finalValue = (typeof curCashStock?.retiredValue !== 'number') ? sales : curCashStock?.retiredValue;
+            const finalValue = curCashStock?.retiredValue;
 
-            const retireLimit = finalValue <= 0 ? 0 : finalValue;
+            const retireLimit = sales;
 
             return {
                 date: date
@@ -172,18 +173,19 @@ function Cashier () {
                     .join('/'),
                 sales: FormatCash(sales),
                 salesInput: sales,
-                isRetireCompleted: Boolean(typeof curCashStock?.retiredValue === 'number'),
+                isRetireCompleted: typeof finalValue === 'number' && finalValue === retireLimit,
                 initialValue: FormatCash(initialValue),
                 initialValueInput: initialValue,
-                finalValue: FormatCash(retireLimit),
+                finalValue: typeof finalValue === 'number' ? FormatCash(finalValue) : null,
                 finalValueInput: (retireLimit).toFixed(2),
-                color: 'black'
+                color: 'black',
+                retiredValue: curCashStock?.retiredValue
             };
         }).filter(item => item.date);
 
         if (values[0])
         {
-            setCurrentStockRetire(values[0].finalValueInput);
+            setCurrentStockRetire(values[0].retiredValue || values[0].finalValueInput);
         }
 
         return values;
@@ -289,9 +291,10 @@ function Cashier () {
                                                                 }}>
                                                                     <div style={{ marginLeft: 16 }}
                                                                         onClick={() => {
-                                                                            if (item.finalValueInput <= 0 || currentStockRetire > item.finalValueInput) return;
-
                                                                             const value = Number(currentStockRetire);
+
+                                                                            if (Number.isNaN(value) || item.finalValueInput <= 0 || value > item.finalValueInput) return;
+
                                                                             if (isNumber(value || 0) && !Number.isNaN(value)) {
                                                                                 if (value < item.finalValueInput) {
                                                                                     setIsShowingWithdrawModal(true);
@@ -316,18 +319,6 @@ function Cashier () {
                                                                     />
                                                                 </TableCell>
                                                             );
-                                                        }
-
-                                                        if (repoIndex !== 0 && index === tableKeys.length - 1 && !item.isRetireCompleted)
-                                                        {
-                                                            return (
-                                                                <TableCell align={prop.align} component="th" scope="row" key={prop.key} style={{ 
-                                                                    fontWeight: prop.bold ? 'bold' : '',  
-                                                                    color: prop.key === 'finalValue' ? item.color : 'black'   
-                                                                }}>
-                                                                    -
-                                                                </TableCell>
-                                                            )
                                                         }
 
                                                         return (

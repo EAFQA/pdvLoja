@@ -172,6 +172,21 @@ export const ActionsProvider = ({ children }) => {
     const nextDay = new Date(currentDate);
     nextDay.setDate(nextDay.getDate() + 1);
 
+    const newCashIndex = actions.findIndex(action => {
+      if (action.type !== 'cash-stock') return;
+
+      const dateOfAction = new Date(action.date);
+
+      const dates = [
+        dateOfAction,
+        nextDay
+      ].map(item => `${item.getDate()}-${item.getMonth()}-${item.getFullYear()}`)
+
+      return (
+        dates[1] === dates[0]
+      );
+    });
+
     const remainingSales = salesValue - retiredValue;
 
     const nextDayValue = {
@@ -181,10 +196,20 @@ export const ActionsProvider = ({ children }) => {
       initialValue: Number((remainingSales + initialValue).toFixed(2))
     };
 
-    newActions.unshift(nextDayValue);
+    if (newCashIndex !== -1) {
+      const updatedActions = [
+        ...newActions
+      ].map((item, index) => {
+        return index === newCashIndex ? nextDayValue : item
+      });
+      setActions(updatedActions);
+      saveData(updatedActions);
+    } else {
+      newActions.unshift(nextDayValue);
+      setActions(newActions);
+      saveData(newActions);
+    }
 
-    setActions(newActions);
-    saveData(newActions);
   }, [actions, saveData]);
 
   const getCurrentInitialValue = useCallback(() => {
