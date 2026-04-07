@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { ImCart } from "react-icons/im";
-import { useCallback, useMemo } from 'react';
-import { MdAddBusiness, MdDelete } from "react-icons/md";
+import { useCallback, useMemo, useRef } from 'react';
+import { MdAddBusiness, MdControlPointDuplicate, MdDelete } from "react-icons/md";
 import { ShortenText } from '../../utils';
 import { Button, IconButton, Tooltip } from '@mui/material';
 import { BiCartAdd } from "react-icons/bi";
@@ -10,6 +10,7 @@ import { IoMdAdd, IoMdRemove } from 'react-icons/io';
 import { MdEdit } from "react-icons/md";
 import { useActions } from '../../contexts/actions';
 import { MdHistory } from "react-icons/md";
+import { useProduct } from '../../contexts/product';
 
 const Container = styled.div`
     display: flex;
@@ -47,7 +48,7 @@ export const ProductItem = styled.div`
   border-radius: 8px;
   padding: 15px;
   box-shadow: 4px 4px 4px 6px rgba(0, 0, 0, 0.1);
-  width: 140px;
+  width: 160px;
   cursor: pointer;
   height: 260px;
   text-align: center;
@@ -78,12 +79,17 @@ function ProductStockList({ products, onEditProduct, onDeleteProduct, onShowProd
   const {
     addItemsToAction,
     editingActionProducts,
+    logAction
   } = useActions();
+
+  const { onDuplicateProduct } = useProduct();
+  const duplicateRef = useRef();
+
   return (
     <ProductContainer>
         {products.map((product) => {
-            const name = ShortenText(product.name || "Test with 150 characters", 14);
-            const showTooltip = product.name?.length > 10;
+            const name = ShortenText(product.name || "Test with 150 characters", 18);
+            const showTooltip = product.name?.length > 14;
 
             const unityToShow = ['litro', 'kg'].includes(product.quantityType) ? product.quantityType : 'un';
 
@@ -107,7 +113,29 @@ function ProductStockList({ products, onEditProduct, onDeleteProduct, onShowProd
                         <MdDelete />
                       </IconButton>
 
-                      <div />
+                      <IconButton onClick={async () => {
+                        if (duplicateRef.current) return;
+                        duplicateRef.current = true;
+
+                        try {
+                          const duplicatedProduct = await onDuplicateProduct(product.id);
+
+                          if (duplicatedProduct.id) {
+                            logAction({
+                                  date: new Date(),
+                                  type: 'stock',
+                                  products: [{
+                                      id: duplicatedProduct.id,
+                                      quantity: duplicatedProduct.stockQuantity,
+                                  }]
+                              });
+                          }
+                        } finally {
+                          duplicateRef.current = false;
+                        }
+                      }}>
+                        <MdControlPointDuplicate />
+                      </IconButton>
 
                       <IconButton onClick={() => {
                         onEditProduct(product);

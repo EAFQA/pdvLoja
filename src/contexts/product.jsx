@@ -114,6 +114,30 @@ export const ProductProvider = ({ children }) => {
     }
   }, []);
 
+  const duplicateImages = useCallback(async (productToDuplicate, newProduct) => {
+    if (!productToDuplicate?.image || !newProduct?.image) return;
+
+    try {
+      const sourceImagePath = productToDuplicate.image.includes(imagePath)
+        ? productToDuplicate.image
+        : `${imagePath}${productToDuplicate.image}`;
+
+      const destinationImagePath = newProduct.image;
+
+      const imagesDirExists = await exists(imagePath, config);
+      if (!imagesDirExists) {
+        await mkdir(imagePath, config);
+      }
+
+      const imageFile = await readFile(sourceImagePath, config);
+      const buffer = imageFile?.buffer ? new Uint8Array(imageFile.buffer) : imageFile;
+
+      await writeFile(destinationImagePath, buffer, config);
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
+
   const saveData = useCallback(async (newProducts) => {
     await writeTextFile(dbName, JSON.stringify(newProducts), config);
   }, []);
@@ -133,7 +157,51 @@ export const ProductProvider = ({ children }) => {
       imageUrl: undefined,
       image: item.image
     })));
-  }, [saveData, saveDataImage, products]);
+
+    await loadData();
+  }, [saveData, saveDataImage, products, loadData]);
+
+  const onDuplicateProduct = useCallback(async (productId) => {
+    const newId = Date.now().toString(36);
+
+    const productToDuplicate = products.find(item => item.id === productId);
+
+    if (!productToDuplicate) return;
+
+    const newProduct = {
+      ...productToDuplicate,
+      id: newId,
+      imageUrl: undefined,
+      image: productToDuplicate.image ?
+        productToDuplicate.image.replace(productToDuplicate.id, newId) : 
+        undefined
+    };
+
+    let copyVersion = 1;
+    const nameWithtoutCopy = productToDuplicate.name.replace(/ \(cópia( \(\d+\))?\)$/, '');
+    let newName = `${nameWithtoutCopy} (cópia)`;
+
+    while (products.some(item => item.name === newName)) {
+      copyVersion += 1;
+      newName = `${nameWithtoutCopy} (cópia (${copyVersion}))`;
+    }
+
+    newProduct.name = newName;
+
+    await duplicateImages(productToDuplicate, newProduct);
+
+    const newList = [...products, newProduct];
+
+    saveData(newList.map(item => ({
+      ...item,
+      imageUrl: undefined,
+      image: item.image
+    })));
+
+    await loadData();
+
+    return newProduct;
+  }, [saveData, products, loadData, duplicateImages]);
 
   const updateProduct = useCallback(async (product) => {
     const newProd = {
@@ -305,7 +373,8 @@ export const ProductProvider = ({ children }) => {
       categoriesToSelect,
       addCategory,
       deleteCategory,
-      updateCategory
+      updateCategory,
+      onDuplicateProduct
     };
   }, [
     activeProducts, 
@@ -316,7 +385,8 @@ export const ProductProvider = ({ children }) => {
     categoriesToSelect,
     addCategory,
     deleteCategory,
-    updateCategory
+    updateCategory,
+    onDuplicateProduct
   ])
 
   return (
