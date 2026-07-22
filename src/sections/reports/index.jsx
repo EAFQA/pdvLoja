@@ -134,7 +134,10 @@ function Reports () {
             const productSales = sales.filter(sale => sale.products.some(item => item.id === curr.id));
 
             const allSales = productSales
-                .map(item => item.products.filter(item => item.id === curr.id))
+                .map(item => item.products
+                    .map(curItem => ({ ...curItem, isCardPayment: item.paymentType === "cartao" }))
+                    .filter(item => item.id === curr.id)
+                )
                 .flat();
 
             const data = {
@@ -145,6 +148,7 @@ function Reports () {
                 productValue: curr.price || 0,
                 total: allSales
                     .reduce((salesAcc, sale) => {
+                        if (sale.isCardPayment) return salesAcc + sale.quantity * sale.price * 0.98;
                         return salesAcc + sale.quantity * sale.price; 
                     }, 0)
             };

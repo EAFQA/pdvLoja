@@ -8,28 +8,11 @@
   "permissions": [
     "core:default",
     "opener:default",
-    {
-      "identifier": "fs:read-all",
-      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**" }]
-    },
-    {
-      "identifier": "fs:write-all",
-      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**" }]
-    },
-    {
-      "identifier": "core:path:default",
-      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**" }]
-    },
-    {
-      "identifier": "core:image:allow-from-path",
-      "allow": [{ "path": "$DOCUMENT" }, { "path": "$DOCUMENT/**" }]
-    }
-  ],
-  "path": {
-    "all": true
-  },
-  "protocol": {
-    "asset": true,
-    "assetScope": ["**"]
-  }
+
+    "fs:allow-document-read-recursive",
+    "fs:allow-document-write-recursive",
+
+    "core:path:default",
+    "core:image:allow-from-path"
+  ]
 }
