@@ -14,6 +14,7 @@
     "@mui/material": "^6.4.7",
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
     "@mui/styled-engine-sc": "^6.4.6",
+    "@react-pdf/renderer": "^4.9.0",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-fs": "~2",
     "@tauri-apps/plugin-opener": "^2",

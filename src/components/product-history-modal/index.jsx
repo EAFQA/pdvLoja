@@ -7,6 +7,7 @@ import { MdDelete } from "react-icons/md";
 import { useProduct } from '../../contexts/product';
 import { toast } from 'react-toastify';
 import { useActions } from '../../contexts/actions';
+import { useInvoicePrint } from '../../contexts/invoicePrint';
 
 const Container = styled.div`
     display: flex;
@@ -58,6 +59,7 @@ const ProductHistoryText = styled.p`
 
 function ProductHistoryModal({ product, handleClose }) {
     const { actions } = useActions();
+    const { openPrintModal } = useInvoicePrint();
 
     const logs = useMemo(() => {
         const filteredLogs = actions.filter(action => action.products.find(p => p.id === product.id));
@@ -85,16 +87,22 @@ function ProductHistoryModal({ product, handleClose }) {
             {
                 const total = productLog.quantity * product.price;
 
-                return `${dateString}Venda de ${productLog.quantity} ${unity}${isPlural ? 's' : ''} por R$${total.toFixed(2).replace('.', ',')}. ${log.paymentType ? "Forma de pagamento: " + log.paymentType : ""}`;
+                return [
+                    `${dateString}Venda de ${productLog.quantity} ${unity}${isPlural ? 's' : ''} por R$${total.toFixed(2).replace('.', ',')}. ${log.paymentType ? "Forma de pagamento: " + log.paymentType : ""}`,
+                    log
+                ];
             }
 
             if (log.type === 'stock')
             {
-                return `${dateString}${productLog.quantity > 0 ? 'Adição' : 'Remoção'} de ${showDecimal(Math.abs(productLog.quantity))} ${unity}${isPlural ? 's' : ''} manualmente`;
+                return [
+                    `${dateString}${productLog.quantity > 0 ? 'Adição' : 'Remoção'} de ${showDecimal(Math.abs(productLog.quantity))} ${unity}${isPlural ? 's' : ''} manualmente`,
+                    log
+                ];
             }
 
-            return "";
-        }).filter(Boolean);
+            return ["", log];
+        }).filter(x => Boolean(x[0]));
     }, [actions, product]);
 
   return (
@@ -106,8 +114,18 @@ function ProductHistoryModal({ product, handleClose }) {
 
             <ProductHistoryList>
                 {logs.map((log, index) => (
-                    <ProductHistoryText key={index} style={{ backgroundColor: index % 2 === 0 ? '#EEEEEE' : '#FFFFFF' }}>
-                        {log}
+                    <ProductHistoryText key={index} 
+                        style={{ 
+                            backgroundColor: index % 2 === 0 ? '#EEEEEE' : '#FFFFFF', 
+                            color: log[1].type === 'sale' ? '#268f52' : '#000000', 
+                            cursor: log[1].type === 'sale' ? 'pointer' : 'default'
+                        }}
+                        onClick={() => {
+                            if (log[1].type !== 'sale') return;
+                            openPrintModal(log[1], false);
+                        }}
+                    >
+                        {log[0]}
                     </ProductHistoryText>
                 ))}
                 {logs.length === 0 && (

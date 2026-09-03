@@ -3,6 +3,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { MdCheck, MdDelete, MdEdit } from "react-icons/md";
 import { Autocomplete, Button, IconButton, TextField } from '@mui/material';
 import { useCart } from '../../contexts/cart';
+import { useInvoicePrint } from '../../contexts/invoicePrint';
 import { useActions } from '../../contexts/actions';
 import { useProduct } from '../../contexts/product';
 import { toast } from 'react-toastify';
@@ -31,6 +32,7 @@ export const ProductItem = styled.div`
 
 function CartList() {
   const { cart, updateQuantityOnCart, removeFromCart, clearCart, buyCart, changePaymentType, paymentType } = useCart();
+  const { openPrintModal } = useInvoicePrint();
   const { logAction } = useActions();
   const { updateStock } = useProduct();
   const [editingProduct, setEditingProduct] = useState(null);
@@ -163,11 +165,11 @@ function CartList() {
           </div>
           <p>Total: R${total}</p>
         </div>
-        <div style={{ marginTop: '10px', height: 80, display: 'flex', justifyContent: 'space-around' }}>
+        <div style={{ marginTop: '10px', height: 80, gap: 24, display: 'flex', justifyContent: 'space-around' }}>
           <Button 
               variant="contained" 
+              size="medium"
               style={{ marginTop: 16, backgroundColor: '#ed2939' }}
-              size="large"
               onClick={() => {
                 if (cart.length) {
                   setShowDeleteModal(true);
@@ -180,7 +182,7 @@ function CartList() {
           <Button 
               variant="contained" 
               style={{ marginTop: 16, backgroundColor: (cart.length && paymentType) ? '#1DBC60' : '#d3d3d3' }}
-              size="large"
+              size="medium"
               onClick={() => {
                 if (!cart.length || !paymentType) return;
 
@@ -192,6 +194,7 @@ function CartList() {
                 const response = buyCart();
                 
                 if (response) {
+                  openPrintModal(response, false);
                   toast.success('Venda efetuada com sucesso!');
                   updateStock(stockAction);
                   logAction(response);
@@ -201,6 +204,23 @@ function CartList() {
               }}
           >
               Efetuar venda
+          </Button>
+
+          <Button 
+              variant="contained" 
+              style={{ marginTop: 16, backgroundColor: (cart.length && paymentType) ? '#1d6fbc' : '#d3d3d3' }}
+              size="medium"
+              onClick={() => {
+                if (!cart.length || !paymentType) return;
+
+                const response = buyCart(true);
+                
+                if (response) {
+                  openPrintModal(response, false);
+                }
+              }}
+          >
+              Orçamento
           </Button>
         </div>
       </div>

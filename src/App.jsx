@@ -13,6 +13,8 @@ import Stock from "./sections/stock";
 import Categories from "./sections/categories";
 import Reports from "./sections/reports";
 import Cashier from "./sections/cashier";
+import { InvoicePrintProvider } from "./contexts/invoicePrint";
+import { InvoiceModal } from "./sections/invoiceModal";
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState('cart');
@@ -23,45 +25,48 @@ function App() {
 
   return (
     <main className="container">
-      <CartProvider>
-        <ActionsProvider>
-          <ProductProvider>
-            <div style={{ height: '100vh', background: '#FFFFFF' }}>
-              <Menu handleRouteChange={handleRouteChange} currentRoute={currentRoute} />
-            </div>
-            <div 
-              style={{ 
-                width: 'calc(100vw - 112px)', 
-                height: '100vh', 
-                background: '#D8D8D6', 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-              }}
-            >
-              {
-                currentRoute === 'cart' && <Cart />
-              }
+      <InvoicePrintProvider>
+        <CartProvider>
+          <ActionsProvider>
+            <ProductProvider>
+              <InvoiceModal />
+              <div style={{ height: '100vh', background: '#FFFFFF' }}>
+                <Menu handleRouteChange={handleRouteChange} currentRoute={currentRoute} />
+              </div>
+              <div 
+                style={{ 
+                  width: 'calc(100vw - 112px)', 
+                  height: '100vh', 
+                  background: '#D8D8D6', 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                }}
+              >
+                {
+                  currentRoute === 'cart' && <Cart />
+                }
 
-              {
-                currentRoute === 'stock' && <Stock />
-              }
+                {
+                  currentRoute === 'stock' && <Stock />
+                }
 
-              {
-                currentRoute === 'category' && <Categories />
-              }
+                {
+                  currentRoute === 'category' && <Categories />
+                }
 
-              {
-                currentRoute === 'reports' && <Reports />
-              }
+                {
+                  currentRoute === 'reports' && <Reports />
+                }
 
-              {
-                currentRoute === 'cashier' && <Cashier />
-              }
-            </div>
-          </ProductProvider>
-        </ActionsProvider>
-      </CartProvider>
+                {
+                  currentRoute === 'cashier' && <Cashier />
+                }
+              </div>
+            </ProductProvider>
+          </ActionsProvider>
+        </CartProvider>
+      </InvoicePrintProvider>
     </main>
   );
 }

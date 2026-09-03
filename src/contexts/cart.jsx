@@ -102,7 +102,7 @@ export const CartProvider = ({ children }) => {
     setCart(cart.filter((item) => item.id !== productId));
   };
 
-  const buyCart = () => {
+  const buyCart = (isOrder = false) => {
     if (!cart.length || !paymentType) return;
     const newSale = {
       products: cart.map(item => ({
@@ -111,7 +111,7 @@ export const CartProvider = ({ children }) => {
         stockQuantity: item.stockQuantity,
         price: item.price
       })),
-      type: 'sale',
+      type: isOrder ? 'order' : 'sale',
       paymentType: paymentType?.value || '',
       date: new Date().toISOString()
     };
